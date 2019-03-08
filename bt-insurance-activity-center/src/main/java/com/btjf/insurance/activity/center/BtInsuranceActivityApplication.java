@@ -5,8 +5,10 @@ import com.bz.ins.activity.question.pojo.QuestionAnswerPojo;
 import com.bz.ins.activity.question.service.QuestionService;
 import com.bz.ins.activity.rank.bo.ActivityRankBo;
 import com.bz.ins.activity.rank.domain.ActivityRankDomain;
+import com.ctrip.framework.apollo.spring.annotation.EnableApolloConfig;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
@@ -19,6 +21,7 @@ import java.util.List;
 @EnableDubbo
 @MapperScan("com.bz.ins.activity.*.mapper")
 @ComponentScan({"com.bz.ins.activity", "com.bz.ins.common.springboot.config"})
+@EnableApolloConfig
 public class BtInsuranceActivityApplication extends SpringBootServletInitializer {
 
 	@Override

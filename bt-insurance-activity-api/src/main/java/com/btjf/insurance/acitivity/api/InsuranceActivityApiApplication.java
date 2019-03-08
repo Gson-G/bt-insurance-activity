@@ -1,7 +1,9 @@
 package com.btjf.insurance.acitivity.api;
 
+import com.ctrip.framework.apollo.spring.annotation.EnableApolloConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
 import org.springframework.boot.autoconfigure.jms.activemq.ActiveMQAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
@@ -15,8 +17,10 @@ import org.springframework.context.annotation.ComponentScan;
  * @describe 版本描述：
  * @modifyLog 修改日志：
  */
-@SpringBootApplication(exclude = {ActiveMQAutoConfiguration.class})
+@SpringBootApplication(exclude = {ActiveMQAutoConfiguration.class, MongoDataAutoConfiguration.class})
 @ComponentScan({"com.btjf.insurance.acitivity"})
+
+@EnableApolloConfig
 public class InsuranceActivityApiApplication extends SpringBootServletInitializer {
 
     @Override
