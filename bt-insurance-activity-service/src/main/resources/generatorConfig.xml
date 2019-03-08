@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+		PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+		"D://repository//mybatis-generator-config_1_0.dtd">
+<generatorConfiguration>
+	<classPathEntry location="/Users/kantenmei/Documents/libs/mysql/mysql-connector-java/5.1.46/mysql-connector-java-5.1.46.jar" />
+	<context id="testTables" targetRuntime="MyBatis3">
+	<plugin type="org.mybatis.generator.plugins.CaseInsensitiveLikePlugin"></plugin>
+	<plugin type="org.mybatis.generator.plugins.SerializablePlugin"></plugin>
+
+	<!-- 需要修改源码 -->
+	<commentGenerator type="org.mybatis.generator.internal.MyCommentGenerator">
+		<!-- mybatisPlus 格式-->
+		<property name="mybatisPlus" value="true"/>
+		<!-- 文件编码 -->
+		<property name="javaFileEncoding" value="UTF-8"/>
+		<!-- 忽略所有注解，使用自定义的注解生成 -->
+		<property name="suppressAllComments" value="true"/>
+		<!-- 作者 -->
+		<property name="author" value="黄雪冬"/>
+		<!-- 时间 value值为时间格式-->
+		<property name="date" value="yyyy/MM/dd"/>
+	</commentGenerator>
+
+		<jdbcConnection driverClass="com.mysql.jdbc.Driver" connectionURL="jdbc:mysql://192.168.101.24:3306/bt-insurance-order?useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false" userId="root"
+			password="Rl123456" />
+		<javaTypeResolver>
+           <property name="forceBigDecimals" value="false"/>
+        </javaTypeResolver>
+		<javaModelGenerator targetPackage="com.bz.ins.activity.season.model" targetProject="src/main/java">
+			<property name="enableSubPackages" value="true" />
+			<property name="trimStrings" value="true" />
+		</javaModelGenerator>
+		<sqlMapGenerator targetPackage="com.bz.ins.activity.season.mapper" targetProject="src/main/java">
+			<property name="enableSubPackages" value="true" />
+		</sqlMapGenerator>
+		<javaClientGenerator targetPackage="com.bz.ins.activity.season.mapper" targetProject="src/main/java" type="XMLMAPPER">
+			<property name="enableSubPackages" value="true" />
+		</javaClientGenerator>
+
+		<table schema="t_Activity_Season" tableName="t_Activity_Season" domainObjectName="ActivitySeason"
+			   enableCountByExample="true" enableUpdateByExample="true"
+			   enableDeleteByExample="true" enableSelectByExample="true"
+			   selectByExampleQueryId="true">
+			<property name="useActualColumnNames" value="true"/>
+			<generatedKey column="FID" sqlStatement="SELECT LAST_INSERT_ID()" identity="true" />
+			<columnRenamingRule searchString="^F" replaceString=""/>
+			<!-- 忽略列，不生成bean 字段 -->
+			<!--<ignoreColumn column="FRED" />-->
+			<!-- 指定列的java数据类型 -->
+			<!--<columnOverride column="DOUBLE" jdbcType="DECIMAL" />-->
+		</table>
+		<!--<table tableName="t_user" domainObjectName="User" delimitIdentifiers="true">-->
+			<!--<property name="useActualColumnNames" value="true"/>-->
+			<!--<generatedKey column="FID" sqlStatement="SELECT @@IDENTITY" identity="true" />-->
+			<!--<columnRenamingRule searchString="^F" replaceString=""/>-->
+			<!--&lt;!&ndash;<columnOverride column="Money" javaType="java.lang.Double" jdbcType="DECIMAL"/>&ndash;&gt;-->
+			<!--&lt;!&ndash;<columnOverride column="FrostFrontMoney" javaType="java.lang.Double" jdbcType="DECIMAL"/>&ndash;&gt;-->
+			<!--&lt;!&ndash;<columnOverride column="FrostLaterMoney" javaType="java.lang.Double" jdbcType="DECIMAL"/>&ndash;&gt;-->
+			<!--&lt;!&ndash;<columnOverride column="FOperateFrontMoney" javaType="java.lang.Double" jdbcType="DECIMAL"/>&ndash;&gt;-->
+			<!--&lt;!&ndash;<columnOverride column="FOperateLaterMoney" javaType="java.lang.Double" jdbcType="DECIMAL"/>&ndash;&gt;-->
+		<!--</table>-->
+	</context>
+</generatorConfiguration>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bz.ins.activity.rank.mapper.ActivityRankMapper">
+    <update id="updateRank">
+        update t_Activity_Rank set FLastScore = FTotalSCore, FTotalSCore = FTotalSCore + #{score, jdbcType = INTEGER}
+        where FID = #{id, jdbcType=INTEGER}
+
+    </update>
+
+    <select id="getRankList" resultType="com.bz.ins.activity.rank.bo.ActivityRankBo">
+        SELECT (@rowNum:=@rowNum+1) rank,t.FID ID,t.FTotalSCore totalSCore,FUserID userID,
+        FLastScore lastScore,FActivityID activity, FSeasonID seasonID,FSeason season, FUserName userName
+
+        FROM t_Activity_Rank  t, (Select (@rowNum :=0) ) b
+        where t.FActivityID = #{activityID,jdbcType=INTEGER} AND t.FSeasonID = #{seasonID, jdbcType=INTEGER}
+        AND t.FIsDelete = 0
+
+        ORDER BY t.FTotalSCore desc
+
+    </select>
+    <select id="getUserRank" resultType="java.lang.Integer">
+        SELECT COUNT(1) + 1 FROM t_Activity_Rank WHERE
+        FTotalScore > #{totalScore, jdbcType=INTEGER}
+        AND FActivityID = #{activityID, jdbcType=INTEGER}
+        AND FSeasonID = #{seasonID, jdbcType=INTEGER}
+        AND FIsDelete = 0
+    </select>
+
+</mapper>

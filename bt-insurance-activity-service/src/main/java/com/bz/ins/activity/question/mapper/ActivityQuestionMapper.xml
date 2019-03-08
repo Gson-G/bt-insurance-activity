@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bz.ins.activity.question.mapper.ActivityQuestionMapper">
+
+
+    <resultMap id="BaseResultMap" type="com.bz.ins.activity.question.pojo.QuestionAnswerPojo">
+        <id column="FID" jdbcType="INTEGER" property="ID"/>
+        <result column="FAnswerID" jdbcType="INTEGER" property="answerID"/>
+        <result column="FContent" jdbcType="VARCHAR" property="content"/>
+        <result column="FActivityID" jdbcType="INTEGER" property="activityID"/>
+        <result column="FSeason" jdbcType="INTEGER" property="season"/>
+        <result column="FSeasonID" jdbcType="INTEGER" property="seasonID"/>
+        <result column="FScore" jdbcType="INTEGER" property="score"/>
+        <result column="FWeight" jdbcType="INTEGER" property="weight"/>
+        <result column="FCreateTime" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="FLastModifyTime" jdbcType="TIMESTAMP" property="lastModifyTime"/>
+        <result column="FIsDelete" jdbcType="BIT" property="isDelete"/>
+    </resultMap>
+
+    <resultMap id="Game_BaseResultMap" type="com.bz.ins.activity.question.pojo.QuestionAnswerPojo" extends="BaseResultMap">
+        <collection property="answers" ofType="com.bz.ins.activity.answer.model.ActivityAnswer">
+            <id column="ansFID" jdbcType="INTEGER" property="ID"/>
+            <result column="FQuestionID" jdbcType="INTEGER" property="questionID"/>
+            <result column="FCode" jdbcType="VARCHAR" property="code"/>
+            <result column="ansFContent" jdbcType="VARCHAR" property="content"/>
+            <result column="ansFCreateTime" jdbcType="TIMESTAMP" property="createTime"/>
+            <result column="ansFLastModifyTime" jdbcType="TIMESTAMP" property="lastModifyTime"/>
+            <result column="ansFIsDelete" jdbcType="BIT" property="isDelete"/>
+        </collection>
+    </resultMap>
+
+    <resultMap id="all_BaseResultMap" type="com.bz.ins.activity.question.pojo.QuestionAnswerPojo" extends="BaseResultMap">
+        <association property="rightAnswer" javaType="com.bz.ins.activity.answer.model.ActivityAnswer">
+            <id column="ansFID" jdbcType="INTEGER" property="ID"/>
+            <result column="FQuestionID" jdbcType="INTEGER" property="questionID"/>
+            <result column="FCode" jdbcType="VARCHAR" property="code"/>
+            <result column="ansFContent" jdbcType="VARCHAR" property="content"/>
+            <result column="ansFCreateTime" jdbcType="TIMESTAMP" property="createTime"/>
+            <result column="ansFLastModifyTime" jdbcType="TIMESTAMP" property="lastModifyTime"/>
+            <result column="ansFIsDelete" jdbcType="BIT" property="isDelete"/>
+        </association>
+    </resultMap>
+
+
+
+    <select id="findQuestionForGame" resultMap="Game_BaseResultMap">
+        SELECT
+        q.FID,q.FAnswerID,q.FContent,q.FActivityID,
+        q.FSeason,q.FSeasonID,q.FScore,q.FWeight,q.FCreateTime,q.FLastModifyTime,q.FIsDelete,
+		a.FID ansFID, a.FQuestionID,a.FCode,
+		a.FContent ansFContent,a.FCreateTime ansFCreateTime,
+		a.FLastModifyTime andFLastModifyTime,a.FIsDelete andFIsdelete
+        FROM t_Activity_Question q
+        join t_Activity_Answer a ON q.FID = a.FQuestionID
+        where q.FIsDelete = 0 AND a.FIsDelete = 0
+        <if test="idList != null">
+             AND q.FID in
+            <foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+
+    </select>
+
+    <select id="findQuestionForGameIds" resultType="com.bz.ins.activity.question.pojo.QuestionAnswerPojo">
+        SELECT
+        q.FID ID,
+        (RAND() * q.FWeight) as weight
+        FROM t_Activity_Question q
+        where q.FIsDelete = 0
+        ORDER BY weight DESC
+        <if test="num != null">
+        limit #{num, jdbcType=INTEGER}
+        </if>
+    </select>
+    <select id="findAll" resultMap="all_BaseResultMap">
+        SELECT
+        q.FID,q.FAnswerID,q.FContent,q.FActivityID,
+        q.FSeason,q.FSeasonID,q.FScore,q.FWeight,q.FCreateTime,q.FLastModifyTime,q.FIsDelete,
+		a.FID ansFID, a.FQuestionID,a.FCode,
+		a.FContent ansFContent,a.FCreateTime ansFCreateTime,
+		a.FLastModifyTime andFLastModifyTime,a.FIsDelete andFIsdelete
+        FROM t_Activity_Question q
+        join t_Activity_Answer a ON q.FAnswerID = a.FID
+        where q.FIsDelete = 0 AND a.FIsDelete = 0
+        <if test="questionID != null">
+            AND q.FID = #{questionID, jdbcType=INTEGER}
+        </if>
+    </select>
+</mapper>

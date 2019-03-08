@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bz.ins.activity.season.mapper.ActivitySeasonMapper">
+
+    <select id="getCurrentSeason" resultType="com.bz.ins.activity.season.bo.ActivitySeasonBo">
+        SELECT FID ID, FSeason season, FActivityID activityID,FStartTime startTime,
+        FEndTime endTime,FStatus status,FNeedInit needInit, FInitTime initTime,FCreateTime createTime,
+        FLastModifyTime lastModifyTime,FIsDelete isDelete
+
+        FROM t_Activity_Season
+        where FEndTime > now() AND FStartTime &lt; now() And FActivityID = #{activityID, jdbcType=INTEGER}
+        AND FIsDelete = 0
+
+    </select>
+
+</mapper>
