@@ -15,5 +15,5 @@ public interface ActivityRankMapper extends BaseMapper<ActivityRank> {
 
     Integer getUserRank(@Param("totalScore")Integer totalScore, @Param("activityID") Integer activityID, @Param("seasonID") Integer seasonID);
 
-    Integer updateRank(Integer id, Integer score);
+    Integer updateRank(@Param("id")Integer id, @Param("score")Integer score);
 }
