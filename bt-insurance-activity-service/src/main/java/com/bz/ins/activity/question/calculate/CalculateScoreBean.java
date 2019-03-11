@@ -31,10 +31,18 @@ public class CalculateScoreBean implements ApplicationListener<ContextRefreshedE
     @Resource
     private ActivityQuestionDomain activityQuestionDomain;
 
+    /**
+     * 题目的正确答案缓存在内存中
+     */
     private TreeMap<Integer, ActivityAnswerBo> questionAnswerMap = Maps.newTreeMap();
 
     private static final Integer MAX_COST = 10;
 
+    /**
+     * 启动的时候把题库加载进来
+     *
+     * @param contextRefreshedEvent
+     */
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         List<QuestionAnswerBo> boList = activityQuestionDomain.findAll();
@@ -56,9 +64,16 @@ public class CalculateScoreBean implements ApplicationListener<ContextRefreshedE
         return calScore(activityAnswerBo, questionScoreBo);
     }
 
+    /**
+     * 判分啦
+     * @param answerBo
+     * @param questionScoreBo
+     * @return
+     */
     private ScoreResult calScore(ActivityAnswerBo answerBo, QuestionScoreBo questionScoreBo) {
         if (answerBo.getID().equals(questionScoreBo.getAnswerID())) {
-            int cost = (int) Math.ceil(questionScoreBo.getCost() / 1000d);
+            int cost = questionScoreBo.getCost() < 1000
+                    ? 0 : (int) Math.ceil(questionScoreBo.getCost() / 1000d);
             cost = cost < MAX_COST ? cost : MAX_COST;
             int score = (int) ((MAX_COST - cost) * 0.1 * answerBo.getScore());
             return new ScoreResult.Builder().score(score).rightAnswerID(questionScoreBo.getAnswerID()).right(true).build();

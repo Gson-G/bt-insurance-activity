@@ -61,6 +61,18 @@ public interface ActivityQuestionDomain {
     QuestionAnswerBo getByQuestionID(Integer questionID) throws ActivityException;
 
 
+    void save(ActivityQuestionBo answerBo);
+
+    /**
+     * 保存
+     * @param answerID
+     */
+    void updateRightAnswer(Integer answerID, Integer id);
+
+
+    void initAnswer();
+
+
 
 
 

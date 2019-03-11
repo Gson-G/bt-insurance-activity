@@ -1,6 +1,7 @@
 package com.btjf.insurance.activity.center;
 
 import com.alibaba.dubbo.config.spring.context.annotation.EnableDubbo;
+import com.bz.ins.activity.question.domain.ActivityQuestionNativeDomain;
 import com.bz.ins.activity.question.pojo.QuestionAnswerPojo;
 import com.bz.ins.activity.question.service.QuestionService;
 import com.bz.ins.activity.rank.bo.ActivityRankBo;
@@ -41,6 +42,10 @@ public class BtInsuranceActivityApplication extends SpringBootServletInitializer
 		System.out.println(answerPojos);
 		List<ActivityRankBo> activityRankBos = activityRankDomain.getRankList(1,1);
 		System.out.println(answerPojos);
+
+		ActivityQuestionNativeDomain activityQuestionDomain = applicationContext.getBean("activityQuestionDomain", ActivityQuestionNativeDomain.class);
+
+		//activityQuestionDomain.initAnswer();
 	}
 
 }

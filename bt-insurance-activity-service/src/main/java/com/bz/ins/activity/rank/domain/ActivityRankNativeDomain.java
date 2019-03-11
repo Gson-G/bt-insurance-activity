@@ -6,7 +6,9 @@ import com.bz.ins.activity.rank.bo.ActivityRankBo;
 import com.bz.ins.activity.rank.bo.UserRankBo;
 import com.bz.ins.activity.rank.model.ActivityRank;
 import com.bz.ins.activity.rank.service.ActivityRankService;
+import com.bz.ins.activity.util.CommonRedisHelper;
 import com.bz.ins.common.utils.BeanUtil;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -25,6 +27,12 @@ public class ActivityRankNativeDomain implements ActivityRankDomain{
 
     @Resource
     private ActivityRankService activityRankService;
+
+    @Resource
+    private CommonRedisHelper commonRedisHelper;
+
+    private static final String RANK_USRE_LOCK_KEY = "rank_user_lock_key_";
+
 
 
     /**
@@ -88,15 +96,16 @@ public class ActivityRankNativeDomain implements ActivityRankDomain{
         ActivityRank activityRank = activityRankService.getByUserID(activityParamBo.getUserID(),
                 activityParamBo.getActivityID(), activityParamBo.getSeasonID());
         if (null == activityRank) {
-            //todo 加锁然后save
             saveRank(activityParamBo);
+            return;
         }
-        activityRankService.updateRank(activityRank.getUserID(), (Integer) activityParamBo.getObject());
+        activityRankService.updateRank(activityRank.getID(), (Integer) activityParamBo.getObject());
     }
 
     private void saveRank(ActivityParamBo<Integer> activityParamBo) {
         ActivityRankBo activityRankBo = new ActivityRankBo.Builder().activityID(activityParamBo.getActivityID())
                 .seasonID(activityParamBo.getSeasonID()).lastScore(0).totalScore(activityParamBo.getObject())
+                .season(activityParamBo.getSeason())
                 .userID(activityParamBo.getUserID()).userName(activityParamBo.getUserName()).build();
         activityRankService.save(BeanUtil.convert(activityRankBo, ActivityRank.class));
     }
@@ -104,6 +113,32 @@ public class ActivityRankNativeDomain implements ActivityRankDomain{
     public void notNull(Object object, String message) {
         if (null == object) {
             throw new ActivityException(message);
+        }
+    }
+
+    public void hehe (ActivityParamBo<Integer> activityParamBo) {
+        String key = RANK_USRE_LOCK_KEY + activityParamBo.getUserID();
+        boolean lock = commonRedisHelper.lock(key);
+        if (lock) {
+            saveRank(activityParamBo);
+            commonRedisHelper.delete(key);
+        } else {
+            int failCount = 1;
+            while (failCount <= 5) {
+                // 等待100ms重试
+                try {
+                    Thread.sleep(100l);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if (commonRedisHelper.lock(key)) {
+                    saveRank(activityParamBo);
+                    commonRedisHelper.delete(key);
+                } else {
+                    failCount++;
+                }
+            }
+            throw new RuntimeException("现在创建的人太多了, 请稍等再试");
         }
     }
 }

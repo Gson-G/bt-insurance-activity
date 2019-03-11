@@ -7,6 +7,7 @@ import com.btjf.insurance.user.bo.UserBo;
 import com.bz.ins.activity.exception.ActivityException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -22,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
  * @describe 版本描述：
  * @modifyLog 修改日志：
  */
+@ControllerAdvice
 public class BaseController<T> {
 
     /**
@@ -30,14 +32,6 @@ public class BaseController<T> {
     private static final Logger logger = LoggerFactory.getLogger(BaseController.class);
 
 
-    @ExceptionHandler({Exception.class})
-    @ResponseBody
-    public XaResult<T> handleUncaughtException(Exception exception) {
-        ControllerLogUtils.printErrorLog(logger, exception);
-        //this.deleteToken();
-        return new XaResult("网络超时,请重试!");
-    }
-
     @ExceptionHandler({ActivityException.class})
     @ResponseBody
     public XaResult<T> handleUncaughtActivityException(ActivityException exception) {
@@ -45,6 +39,21 @@ public class BaseController<T> {
         //this.deleteToken();
         return new XaResult(exception.getMessage());
     }
+
+    @ExceptionHandler({Exception.class})
+    @ResponseBody
+    public XaResult<T> handleUncaughtException(Exception exception) {
+        ControllerLogUtils.printErrorLog(logger, exception);
+        if (exception.getCause() instanceof ActivityException
+                || (null != exception.getCause() && exception.getCause().getCause() instanceof ActivityException)) {
+            return new XaResult(exception.getCause().getCause().getMessage());
+        } else {
+            return new XaResult("网络超时,请重试!");
+        }
+
+    }
+
+
 
     /**
      * 获取当前登录的员工ID

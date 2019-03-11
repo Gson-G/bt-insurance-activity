@@ -34,7 +34,7 @@ public interface ActivityRankDomain {
      * 排行榜
      * @return
      */
-    List<ActivityRankBo>  getRankList(Integer activityID, Integer seasonID) throws ActivityException;
+    List<ActivityRankBo> getRankList(Integer activityID, Integer seasonID) throws ActivityException;
 
     /**
      * 获取用户排行

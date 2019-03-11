@@ -40,7 +40,10 @@
             <result column="ansFIsDelete" jdbcType="BIT" property="isDelete"/>
         </association>
     </resultMap>
+    <update id="updateRightAnswer">
 
+        update t_Activity_Question set FAnswerID = #{answerID,jdbcType=INTEGER} where FID = #{id, jdbcType=INTEGER}
+    </update>
 
 
     <select id="findQuestionForGame" resultMap="Game_BaseResultMap">

@@ -1,10 +1,12 @@
 package com.bz.ins.activity.answer.domain;
 
 import com.bz.ins.activity.answer.bo.ActivityAnswerBo;
+import com.bz.ins.activity.answer.model.ActivityAnswer;
 import com.bz.ins.activity.answer.service.AnswerService;
 import com.bz.ins.common.utils.BeanUtil;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -19,6 +21,7 @@ import java.util.List;
 public class AnswerNativeDomain implements AnswerDomain{
 
 
+    @Resource
     private AnswerService answerService;
 
     /**
@@ -42,5 +45,16 @@ public class AnswerNativeDomain implements AnswerDomain{
     @Override
     public List<ActivityAnswerBo> findByQuestionID(Integer questionID) {
         return null;
+    }
+
+    /**
+     * 保存答案
+     *
+     * @param activityAnswerBo
+     * @return
+     */
+    @Override
+    public Integer save(ActivityAnswerBo activityAnswerBo) {
+       return answerService.save(BeanUtil.convert(activityAnswerBo, ActivityAnswer.class));
     }
 }

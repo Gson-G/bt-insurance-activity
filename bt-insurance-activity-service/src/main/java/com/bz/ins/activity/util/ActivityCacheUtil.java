@@ -54,9 +54,9 @@ public class ActivityCacheUtil {
     public ActivityBo getActivityMessageCache(Integer activityID, Integer seasonID) throws ActivityException {
         String key = ActivityContants.getActivityMessageCacheKey(activityID, seasonID);
         //String result = redisTemplate.opsForValue().get(key);
-        String result = cache.get(key);
-        if (!StringUtils.isEmpty(result)) {
-            return JSON.parseObject(result, new TypeReference<ActivityBo>(){});
+        ActivityBo result = getCache(key);
+        if (null != result) {
+            return result;
         }
         Activity activity = activityService.getByID(activityID);
         if (null == activity) {
@@ -73,10 +73,30 @@ public class ActivityCacheUtil {
                 .cacheActivity(new ActivityParamBo(activityBo, activityID, seasonID));
         if (ActivityResultBo.isSuccess(activityResultBo)) {
             //redisTemplate.opsForValue().set(key, JSON.toJSONString(activityResultBo.getObject()));
-            cache.put(key, JSON.toJSONString(activityResultBo.getObject()));
+            putCache(activityResultBo.getObject(), key);
             return activityResultBo.getObject();
         }
         return null;
+    }
+
+
+    private ActivityBo getCache(String key) {
+        String result = cache.get(key);
+        if (!StringUtils.isEmpty(result)) {
+            CacheInfoPojo<ActivityBo> cacheInfoPojo = JSON.parseObject(result, new TypeReference<CacheInfoPojo<ActivityBo>>(){});
+            Long currentTime = System.currentTimeMillis();
+            if (cacheInfoPojo.getExpTime() < currentTime) {
+                return null;
+            }
+            return cacheInfoPojo.getObject();
+        }
+        return null;
+    }
+
+    private void putCache(ActivityBo activityBo, String key) {
+        Long exptime = System.currentTimeMillis() + 1000 * 60 * 10;
+        CacheInfoPojo<ActivityBo> cacheInfoPojo = new CacheInfoPojo<>(exptime, activityBo);
+        cache.put(key, JSON.toJSONString(cacheInfoPojo));
     }
 
     public ActivitySeasonBo getCurrentSeasonFromCache(Integer activityID) throws ActivityException {
@@ -104,7 +124,7 @@ public class ActivityCacheUtil {
     private ActivitySeasonBo getFromDbThenCache(Integer activityID) throws ActivityException{
         ActivitySeasonBo activitySeasonBo = activitySeasonService.getCurrentSeason(activityID);
         if (null != activitySeasonBo) {
-            Long exptime = System.currentTimeMillis() + 1000 * 1000 * 3600 * 24;
+            Long exptime = System.currentTimeMillis() + 1000 * 60 * 30;
             CacheInfoPojo<ActivitySeasonBo> cacheInfoPojo = new CacheInfoPojo<>(exptime, activitySeasonBo);
             cache.put(ActivityContants.getActivitySeasonCahcheKey(activityID), JSON.toJSONString(cacheInfoPojo));
             return activitySeasonBo;

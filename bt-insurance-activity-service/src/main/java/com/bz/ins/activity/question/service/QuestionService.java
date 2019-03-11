@@ -54,4 +54,12 @@ public class QuestionService {
         List<Integer> idList = questionAnswerPojos.stream().map(QuestionAnswerPojo :: getID).collect(Collectors.toList());
         return activityQuestionMapper.findQuestionForGame(idList);
     }
+
+    public void save(ActivityQuestion question) {
+        activityQuestionMapper.insert(question);
+    }
+
+    public void updateRightAnswer(Integer answerID, Integer id) {
+        activityQuestionMapper.updateRightAnswer(answerID, id);
+    }
 }

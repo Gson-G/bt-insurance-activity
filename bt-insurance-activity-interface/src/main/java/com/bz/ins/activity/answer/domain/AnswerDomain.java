@@ -30,5 +30,13 @@ public interface AnswerDomain {
      */
     List<ActivityAnswerBo> findByQuestionID(Integer questionID);
 
+    /**
+     *
+     * 保存答案
+     * @param activityAnswerBo
+     * @return
+     */
+    Integer save(ActivityAnswerBo activityAnswerBo);
+
 
 }

@@ -1,6 +1,7 @@
 package com.bz.ins.activity.question.domain;
 
 import com.bz.ins.activity.answer.bo.ActivityAnswerBo;
+import com.bz.ins.activity.answer.domain.AnswerDomain;
 import com.bz.ins.activity.exception.ActivityException;
 import com.bz.ins.activity.joinrecord.domain.ActivityJoinRecordDomain;
 import com.bz.ins.activity.question.bo.ActivityQuestionBo;
@@ -8,8 +9,11 @@ import com.bz.ins.activity.question.bo.QuestionAnswerBo;
 import com.bz.ins.activity.question.bo.QuestionScoreBo;
 import com.bz.ins.activity.question.bo.ScoreResult;
 import com.bz.ins.activity.question.calculate.CalculateScoreBean;
+import com.bz.ins.activity.question.model.ActivityQuestion;
 import com.bz.ins.activity.question.pojo.QuestionAnswerPojo;
 import com.bz.ins.activity.question.service.QuestionService;
+import com.bz.ins.activity.util.ExcelPoji;
+import com.bz.ins.activity.util.ExcelUtil;
 import com.bz.ins.common.utils.BeanUtil;
 import com.google.common.collect.Lists;
 import org.springframework.context.annotation.Bean;
@@ -17,7 +21,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 /**
@@ -38,7 +46,14 @@ public class ActivityQuestionNativeDomain implements ActivityQuestionDomain {
     private CalculateScoreBean calculateScoreBean;
 
     @Resource
+    private AnswerDomain answerDomain;
+
+    @Resource
     private ActivityJoinRecordDomain activityJoinRecordDomain;
+
+    private final static String QUESTION_CONTENT = "%1$s的花名是什么";
+
+    private final static String QUESTION_CONTENT_TWO = "%1$s是谁的花名";
 
     /**
      * 通过id获取问题
@@ -108,6 +123,66 @@ public class ActivityQuestionNativeDomain implements ActivityQuestionDomain {
     public QuestionAnswerBo getByQuestionID(Integer questionID) throws ActivityException {
         QuestionAnswerPojo answerPojo = questionService.queryByUserID(questionID);
         return convertToBo(answerPojo);
+    }
+
+    @Override
+    public void save(ActivityQuestionBo answerBo) {
+        questionService.save(BeanUtil.convert(answerBo, ActivityQuestion.class));
+    }
+
+    /**
+     * 保存
+     *
+     * @param answerID
+     */
+    @Override
+    public void updateRightAnswer(Integer answerID, Integer id) {
+        questionService.updateRightAnswer(answerID, id);
+    }
+
+    @Override
+    public void initAnswer() {
+
+        File file = new File("/Users/kantenmei/Downloads/quest.xlsx");
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(file);
+            List<ExcelPoji> ls = ExcelUtil.parseExcel(fis, file.getName());
+            List<String> nickNameList = ls.stream().map(ExcelPoji :: getNickName).collect(Collectors.toList());
+            List<String> nameList = ls.stream().map(ExcelPoji :: getName).collect(Collectors.toList());
+            System.out.println(ls.size());
+            ls.forEach(t -> saveQuestion(t, nickNameList, nameList));
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void saveQuestion(ExcelPoji excelPoji, List<String> nickNameList, List<String> nameList) {
+        ActivityQuestionBo activityQuestion = new ActivityQuestionBo.Builder()
+                .activityID(1).season(1).seasonID(1).score(10).content(String.format(QUESTION_CONTENT, excelPoji.getName())).answerID(0)
+                .weight(Boolean.TRUE.equals(excelPoji.getBoss()) ? 11 : 10).build();
+        ActivityQuestion activityQuestion1 = BeanUtil.convert(activityQuestion, ActivityQuestion.class);
+        questionService.save(activityQuestion1);
+        Integer id = activityQuestion1.getID();
+        ActivityAnswerBo activityAnswerBo = new ActivityAnswerBo.Builder().content(excelPoji.getNickName()).code("N")
+                .questionID(id).score(10).build();
+        Integer rightAnswer = answerDomain.save(activityAnswerBo);
+        updateRightAnswer(rightAnswer, id);
+        int i = 0;
+        while (i < 3) {
+            Random random = new Random();
+            Integer hehe = random.nextInt(nickNameList.size() - 1);
+            String nickName = nickNameList.get(hehe);
+            if (!nickName.equals(excelPoji.getNickName())) {
+                ActivityAnswerBo activityAnswerBo1 = new ActivityAnswerBo.Builder().content(nickName).code("N")
+                        .questionID(id).score(10).build();
+                answerDomain.save(activityAnswerBo1);
+                i++;
+            }
+        }
     }
 
     private List<QuestionAnswerBo> convertToBo(List<QuestionAnswerPojo> pojoList) {

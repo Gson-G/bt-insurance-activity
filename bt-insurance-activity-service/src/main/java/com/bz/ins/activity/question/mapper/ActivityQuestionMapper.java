@@ -19,4 +19,5 @@ public interface ActivityQuestionMapper extends BaseMapper<ActivityQuestion> {
 
     List<QuestionAnswerPojo> findAll(@Param("questionID") Integer num);
 
+    void updateRightAnswer(@Param("answerID") Integer answerID, @Param("id") Integer id);
 }

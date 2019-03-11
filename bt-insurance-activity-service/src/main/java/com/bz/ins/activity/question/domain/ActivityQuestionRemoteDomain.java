@@ -85,4 +85,25 @@ public class ActivityQuestionRemoteDomain implements ActivityQuestionDomain{
     public QuestionAnswerBo getByQuestionID(Integer questionID) throws ActivityException {
         return activityQuestionDomain.getByQuestionID(questionID);
     }
+
+    @Override
+    public void save(ActivityQuestionBo answerBo) {
+        activityQuestionDomain.save(answerBo);
+    }
+
+    /**
+     * 保存
+     *
+     * @param answerID
+     * @param id
+     */
+    @Override
+    public void updateRightAnswer(Integer answerID, Integer id) {
+        activityQuestionDomain.updateRightAnswer(answerID, id);
+    }
+
+    @Override
+    public void initAnswer() {
+        activityQuestionDomain.initAnswer();
+    }
 }

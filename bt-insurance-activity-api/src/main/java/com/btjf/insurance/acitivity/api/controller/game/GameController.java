@@ -2,12 +2,14 @@ package com.btjf.insurance.acitivity.api.controller.game;
 
 import com.btjf.application.util.XaResult;
 import com.btjf.insurance.acitivity.api.controller.BaseController;
+import com.btjf.insurance.acitivity.api.token.RequestTokenManage;
 import com.btjf.insurance.acitivity.api.vo.*;
 import com.btjf.insurance.user.bo.UserBo;
 import com.btjf.insurance.user.domain.UserDomain;
 import com.bz.ins.activity.activity.bo.ActivityParamBo;
 import com.bz.ins.activity.activity.bo.ActivityResultBo;
 import com.bz.ins.activity.activity.domain.ActivityDomain;
+import com.bz.ins.activity.exception.ActivityException;
 import com.bz.ins.activity.joinrecord.bo.ActivityJoinRecordBo;
 import com.bz.ins.activity.joinrecord.domain.ActivityJoinRecordDomain;
 import com.bz.ins.activity.question.bo.QuestionAnswerBo;
@@ -19,10 +21,15 @@ import com.bz.ins.activity.rank.bo.UserRankBo;
 import com.bz.ins.activity.rank.domain.ActivityRankDomain;
 import com.bz.ins.activity.season.bo.ActivitySeasonBo;
 import com.bz.ins.activity.season.domain.ActivitySeasonDomain;
+import com.google.common.collect.Maps;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -58,13 +65,18 @@ public class GameController extends BaseController {
     @Reference(version = "1.0.0", timeout = 5000)
     private ActivitySeasonDomain activitySeasonDomain;
 
+    @Resource
+    private RequestTokenManage requestTokenManage;
+
+    private static final String REQUEST_TOKEN = "requestToken";
+
     /**
      * 计算分数-单题
      * @param gameScoreVo
      * @return
      */
     @PostMapping("/calScore" )
-    public XaResult<GameResultVo> calScore(@RequestBody GameScoreVo gameScoreVo) {
+    public XaResult<GameResultVo> calScore(@RequestBody GameScoreVo gameScoreVo) throws ActivityException{
 
         QuestionScoreBo questionScoreBo = new QuestionScoreBo();
 
@@ -78,7 +90,7 @@ public class GameController extends BaseController {
     }
 
     @GetMapping("/getQuestion")
-    public XaResult<List<QuestionVo>> getQuestion() {
+    public XaResult<List<QuestionVo>> getQuestion() throws ActivityException {
         ActivitySeasonBo activitySeasonBo = activitySeasonDomain.getCurrentSeason(ACTIVITYID);
         if (null == activitySeasonBo) {
             return XaResult.error("没有正在进行的活动");
@@ -88,11 +100,22 @@ public class GameController extends BaseController {
         ActivityResultBo<List<QuestionAnswerBo>> questions = activityDomain.getReady(activityParamBo);
         List<QuestionAnswerBo> boList = questions.getObject();
         List<QuestionVo> voList = QuestionVo.convertToList(boList);
-        return XaResult.success(voList);
+
+        HashMap<String, Object> map = Maps.newHashMap();
+        map.put("requestToken", requestTokenManage.getAndCacheRequestToken());
+        return XaResult.success(voList, map);
     }
 
     @PostMapping("/total")
-    public XaResult<GameResultVo> getTotal(@RequestBody CustomerAnswerListVo customerAnswerListVo) {
+    public XaResult<GameResultVo> getTotal(@RequestBody CustomerAnswerListVo customerAnswerListVo,
+                                           HttpServletRequest httpServletRequest) throws ActivityException{
+        String requestToken = httpServletRequest.getHeader(REQUEST_TOKEN);
+        if (StringUtils.isBlank(requestToken)) {
+            return XaResult.error("不合法请求");
+        }
+
+        //校验requestToken
+        requestTokenManage.getAndValidate(requestToken);
         ActivitySeasonBo activitySeasonBo = activitySeasonDomain.getCurrentSeason(ACTIVITYID);
         if (null == activitySeasonBo) {
             return XaResult.error("没有正在进行的活动");
@@ -111,12 +134,11 @@ public class GameController extends BaseController {
                 .season(activitySeasonBo.getSeason()).object(scoreResult.getScore()).userName(userBo.getRealName()).build();
         activityRankDomain.updateRank(activityParamBo);
 
-
         return XaResult.success(new GameResultVo(scoreResult));
     }
 
     @GetMapping("/rank")
-    public XaResult<List<RankVo>> getRank() {
+    public XaResult<List<RankVo>> getRank() throws ActivityException{
         ActivitySeasonBo activitySeasonBo = activitySeasonDomain.getCurrentSeason(ACTIVITYID);
         if (null == activitySeasonBo) {
             return XaResult.error("没有正在进行的活动");
@@ -129,7 +151,7 @@ public class GameController extends BaseController {
     }
 
     @GetMapping("/user")
-    public XaResult<RankVo> getUserMessage() {
+    public XaResult<RankVo> getUserMessage() throws ActivityException{
         ActivitySeasonBo activitySeasonBo = activitySeasonDomain.getCurrentSeason(ACTIVITYID);
         if (null == activitySeasonBo) {
             return XaResult.error("没有正在进行的活动");
