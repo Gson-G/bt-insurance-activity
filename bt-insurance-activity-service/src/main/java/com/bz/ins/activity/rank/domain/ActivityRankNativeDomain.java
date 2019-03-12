@@ -1,12 +1,14 @@
 package com.bz.ins.activity.rank.domain;
 
 import com.bz.ins.activity.activity.bo.ActivityParamBo;
+import com.bz.ins.activity.activity.model.Activity;
 import com.bz.ins.activity.exception.ActivityException;
 import com.bz.ins.activity.rank.bo.ActivityRankBo;
 import com.bz.ins.activity.rank.bo.UserRankBo;
 import com.bz.ins.activity.rank.model.ActivityRank;
 import com.bz.ins.activity.rank.service.ActivityRankService;
 import com.bz.ins.activity.util.CommonRedisHelper;
+import com.bz.ins.activity.util.RedisLockResult;
 import com.bz.ins.common.utils.BeanUtil;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -107,7 +109,7 @@ public class ActivityRankNativeDomain implements ActivityRankDomain{
         ActivityRank activityRank = activityRankService.getByUserID(activityParamBo.getUserID(),
                 activityParamBo.getActivityID(), activityParamBo.getSeasonID());
         if (null == activityRank) {
-            saveRank(activityParamBo);
+            synchSave(activityParamBo);
             return;
         }
         activityRankService.updateRank(activityRank.getID(), (Integer) activityParamBo.getObject());
@@ -127,29 +129,17 @@ public class ActivityRankNativeDomain implements ActivityRankDomain{
         }
     }
 
-    public void hehe (ActivityParamBo<Integer> activityParamBo) {
+    public void synchSave(ActivityParamBo<Integer> activityParamBo) {
         String key = RANK_USRE_LOCK_KEY + activityParamBo.getUserID();
-        boolean lock = commonRedisHelper.lock(key);
-        if (lock) {
-            saveRank(activityParamBo);
-            commonRedisHelper.delete(key);
-        } else {
-            int failCount = 1;
-            while (failCount <= 5) {
-                // 等待100ms重试
-                try {
-                    Thread.sleep(100l);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                if (commonRedisHelper.lock(key)) {
-                    saveRank(activityParamBo);
-                    commonRedisHelper.delete(key);
-                } else {
-                    failCount++;
-                }
+        RedisLockResult lock = commonRedisHelper.lock(key, 3000l);
+        try {
+            if (lock.isLockSuccess()) {
+                saveRank(activityParamBo);
+            } else {
+                throw new ActivityException("网络繁忙请稍后重试");
             }
-            throw new RuntimeException("现在创建的人太多了, 请稍等再试");
+        } finally {
+            commonRedisHelper.releaseLock(key, lock);
         }
     }
 }
