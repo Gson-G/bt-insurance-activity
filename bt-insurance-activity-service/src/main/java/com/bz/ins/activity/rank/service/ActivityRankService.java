@@ -49,6 +49,10 @@ public class ActivityRankService {
         return activityRankMapper.getUserRank(totalScore, activityID, seasonID);
     }
 
+    public List<ActivityRankBo> getSameScoreUserRankList(Integer totalScore, Integer activityID, Integer seasonID) {
+        return activityRankMapper.getUserRankList(totalScore, activityID, seasonID);
+    }
+
 
     public boolean updateRank(Integer id, Integer score) {
         return activityRankMapper.updateRank(id, score) > 1;

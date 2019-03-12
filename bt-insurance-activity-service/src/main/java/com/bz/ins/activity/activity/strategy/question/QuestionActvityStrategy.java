@@ -50,7 +50,7 @@ public class QuestionActvityStrategy extends DefaultActivityStrategy {
      */
     @Override
     public ActivityResultBo cacheActivity(ActivityParamBo activityParamBo) {
-        ActivitySeason activitySeason = activitySeasonService.getByID(1);
+        ActivitySeason activitySeason = activitySeasonService.getByID(activityParamBo.getSeasonID());
         if (null ==  activitySeason) {
             return ActivityResultBo.fail();
         }

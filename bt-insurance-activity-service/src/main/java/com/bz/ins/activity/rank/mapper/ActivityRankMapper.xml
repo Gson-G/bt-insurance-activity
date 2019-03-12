@@ -9,14 +9,40 @@
     </update>
 
     <select id="getRankList" resultType="com.bz.ins.activity.rank.bo.ActivityRankBo">
-        SELECT (@rowNum:=@rowNum+1) rank,t.FID ID,t.FTotalSCore totalSCore,FUserID userID,
-        FLastScore lastScore,FActivityID activity, FSeasonID seasonID,FSeason season, FUserName userName
-
-        FROM t_Activity_Rank  t, (Select (@rowNum :=0) ) b
-        where t.FActivityID = #{activityID,jdbcType=INTEGER} AND t.FSeasonID = #{seasonID, jdbcType=INTEGER}
-        AND t.FIsDelete = 0
-
-        ORDER BY t.FTotalSCore desc
+        SELECT
+	( @rowNum := @rowNum + 1 ) rank,
+	ID, totalSCore,userID,lastScore,activity,seasonID,season,userName
+    FROM
+	(
+	SELECT
+		t.FID ID,
+		t.FTotalSCore totalSCore,
+		FUserID userID,
+		FLastScore lastScore,
+		FActivityID activity,
+		FSeasonID seasonID,
+		FSeason season,
+		FUserName userName,
+		(
+		SELECT
+			count( 1 ) num
+		FROM
+			t_Activity_JoinRecord t2
+		WHERE
+			t2.FUserID = userID
+		) AS sortC
+	FROM
+		t_Activity_Rank t
+	WHERE
+		t.FActivityID = #{activityID,jdbcType=INTEGER}
+		AND t.FSeasonID = #{seasonID, jdbcType=INTEGER}
+		AND t.FIsDelete = 0
+	ORDER BY
+		t.FTotalSCore DESC,
+		sortC ASC
+		LIMIT 100
+	) t3,
+	( SELECT ( @rowNum := 0 ) ) b
 
     </select>
     <select id="getUserRank" resultType="java.lang.Integer">
@@ -25,6 +51,48 @@
         AND FActivityID = #{activityID, jdbcType=INTEGER}
         AND FSeasonID = #{seasonID, jdbcType=INTEGER}
         AND FIsDelete = 0
+    </select>
+    <select id="getUserRankList" resultType="com.bz.ins.activity.rank.bo.ActivityRankBo">
+        SELECT
+	( @rowNum := @rowNum + 1 ) rank,
+	ID,
+	totalSCore,
+	userID,
+	lastScore,
+	activity,
+	seasonID,
+	season,
+	userName
+FROM
+	(
+	SELECT
+		t.FID ID,
+		t.FTotalSCore totalSCore,
+		FUserID userID,
+		FLastScore lastScore,
+		FActivityID activity,
+		FSeasonID seasonID,
+		FSeason season,
+		FUserName userName,
+		(
+		SELECT
+			count( 1 ) num
+		FROM
+			t_Activity_JoinRecord t2
+		WHERE
+			t2.FUserID = userID
+		) AS sortC
+	FROM
+		t_Activity_Rank t
+	WHERE
+		t.FActivityID = #{activityID,jdbcType=INTEGER}
+		AND t.FSeasonID = #{seasonID, jdbcType=INTEGER}
+		AND t.FIsDelete = 0
+		AND t.FTotalScore = #{totalScore, jdbcType=INTEGER}
+	ORDER BY
+		sortC ASC
+	) t3,
+	( SELECT ( @rowNum := 0 ) ) b
     </select>
 
 </mapper>

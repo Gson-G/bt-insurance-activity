@@ -156,12 +156,15 @@ public class GameController extends BaseController {
         if (null == activitySeasonBo) {
             return XaResult.error("没有正在进行的活动");
         }
+        //排名信息
         UserRankBo userRank = activityRankDomain
                 .getUserRank(getCurrentUserID(), ACTIVITYID, activitySeasonBo.getID());
 
+        //活动信息
         UserBo userBo = userDomain.get(getCurrentUserID());
+        ActivityResultBo activityResultBo = activityDomain.getActivityMessage(ACTIVITYID, activitySeasonBo.getID());
 
-        return XaResult.success(new RankVo(userBo, userRank));
+        return XaResult.success(new RankVo(userBo, userRank, activityResultBo));
     }
 
 }

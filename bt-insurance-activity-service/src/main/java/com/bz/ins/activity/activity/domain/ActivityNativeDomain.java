@@ -100,7 +100,8 @@ public class ActivityNativeDomain implements ActivityDomain{
     public ActivityResultBo getActivityMessage(Integer activityID, Integer seasonID) throws ActivityException {
         ActivityBo activityBo = activityCacheUtil
                 .getActivityMessageCache(activityID, seasonID);
-        return ActivityResultBo.success(activityBo);
+
+        return null == activityBo ? ActivityResultBo.fail() : ActivityResultBo.success(activityBo);
     }
 
     /**

@@ -10,6 +10,7 @@ import com.bz.ins.activity.util.CommonRedisHelper;
 import com.bz.ins.common.utils.BeanUtil;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -77,6 +78,16 @@ public class ActivityRankNativeDomain implements ActivityRankDomain{
         ActivityRank activityRank = activityRankService.getByUserID(userID, activityID, seasonID);
         if (null != activityRank) {
             Integer rank = activityRankService.getUserRank(activityRank.getTotalScore(), activityID, seasonID);
+            List<ActivityRankBo> boList = activityRankService.getSameScoreUserRankList(activityRank.getTotalScore(), activityID, seasonID);
+            //没有相同分数的 直接返回排名
+            if (CollectionUtils.isEmpty(boList)) {
+                return new UserRankBo(rank, activityRank.getTotalScore());
+            }
+            //相同分数再排名一下  按照参加游戏的次数正序
+            ActivityRankBo userRankBo = boList.stream().filter(t -> userID.equals(t.getUserID())).findFirst().orElse(null);
+            if (null != userRankBo) {
+                return new UserRankBo(rank + userRankBo.getRank() - 1, activityRank.getTotalScore());
+            }
             return new UserRankBo(rank, activityRank.getTotalScore());
         }
         return new UserRankBo(0, 0);

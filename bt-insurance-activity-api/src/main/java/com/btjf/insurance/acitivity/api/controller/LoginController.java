@@ -10,6 +10,7 @@ import com.btjf.insurance.user.bo.AccessTokenBo;
 import com.btjf.insurance.user.bo.UserBo;
 import com.btjf.insurance.user.domain.AccessTokenDomain;
 import com.btjf.insurance.user.domain.UserDomain;
+import com.btjf.insurance.user.enums.DeptType;
 import com.btjf.insurance.user.enums.LoginPermissions;
 import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.web.bind.annotation.*;
@@ -49,10 +50,11 @@ public class LoginController {
             if (!userDomain.checkLoginPermissionsByUserId(userBo.getID(), LoginPermissions.INSURANCE_SYSTEM)) {
                 return XaResult.error("无权限登录！");
             }
-            if (MD5Utils.getMD5String(loginVo.getPassword()).equals(userBo.getPassword())) {
-
-            } else {
+            if (!MD5Utils.getMD5String(loginVo.getPassword()).equals(userBo.getPassword())) {
                 return XaResult.error("输入的密码有误");
+            }
+            if (DeptType.INTERNAL_COMPANY.equals(userBo.getDeptType())) {
+                return XaResult.error("非内部用户无法登录");
             }
         } else {
             return XaResult.error("输入的用户名不存在");
@@ -74,10 +76,11 @@ public class LoginController {
         Date effectTime = DateUtil.dateAfter(new Date(), Calendar.DAY_OF_MONTH, 15);
 
         AccessTokenBo accessTokenBo = new AccessTokenBo.Builder().token(accessToken).createTime(new Date())
-                .effectiveTime(effectTime).landSource(ClientType.MANAGE.getValue()).userID(userBo.getID()).build();
+                .effectiveTime(effectTime).landSource(ClientType.PC.getValue()).userID(userBo.getID()).build();
         accessTokenDomain.add(accessTokenBo);
         //缓存
         accessTokenManage.put(accessTokenBo.getToken(), userBo, effectTime.getTime());
+
         return accessTokenBo;
     }
 
