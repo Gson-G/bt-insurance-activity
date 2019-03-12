@@ -39,22 +39,19 @@ public class CommonRedisHelper {
     @Resource
     private RedisTemplate redisTemplate;
 
-
-    public void releaseLock(String key, RedisLockResult redisLockResult) {
-        String lock = LOCK_PREFIX + key;
-        String result = (String) redisTemplate.opsForValue().get(lock);
-        if (redisLockResult.getLockedKey().equals(result)) {
-            redisTemplate.opsForValue().getOperations().delete(lock);
-        }
-    }
-
-
+    /**
+     * 加锁
+     * @param key key
+     * @param expTime 加锁自旋时间
+     * @return
+     */
     public RedisLockResult lock(String key, long expTime) {
         RedisLockResult result;
         long expEndTime = System.currentTimeMillis() + expTime;
         String locResultKey = UUID.randomUUID().toString() + Thread.currentThread().getName();
         try {
             while (System.currentTimeMillis() < expEndTime) {
+                //自旋
                 result = doGetLock(key, locResultKey);
                 if (result.isLockSuccess()) {
                     return result;
@@ -68,11 +65,25 @@ public class CommonRedisHelper {
         return new RedisLockResult(" ", false);
     }
 
+    /**
+     * 释放锁
+     * @param key
+     * @param redisLockResult
+     */
+    public void releaseLock(String key, RedisLockResult redisLockResult) {
+        //释放的时候判断是否是自己加的锁
+        String lock = LOCK_PREFIX + key;
+        String result = (String) redisTemplate.opsForValue().get(lock);
+        if (redisLockResult.getLockedKey().equals(result)) {
+            redisTemplate.opsForValue().getOperations().delete(lock);
+        }
+    }
+
     private RedisLockResult doGetLock(String key, String locResultKey) {
         String lock = LOCK_PREFIX + key;
 
         Boolean isLocked = (Boolean) redisTemplate.execute((RedisCallback) connection -> {
-
+            //3秒钟的锁持有时间 当前业务够用了, 后面考虑实现续约
             Expiration expiration = Expiration.seconds(3);
             Boolean acquire = connection.set(lock.getBytes(), locResultKey.getBytes(),
                     expiration, RedisStringCommands.SetOption.SET_IF_ABSENT);
@@ -80,15 +91,4 @@ public class CommonRedisHelper {
         });
         return new RedisLockResult(locResultKey, isLocked);
     }
-
-
-    /**
-     * 删除锁
-     *
-     * @param key
-     */
-    public void delete(String key) {
-        redisTemplate.delete(key);
-    }
-
 }
