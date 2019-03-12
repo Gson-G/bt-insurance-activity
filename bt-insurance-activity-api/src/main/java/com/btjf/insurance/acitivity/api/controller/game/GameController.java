@@ -126,7 +126,7 @@ public class GameController extends BaseController {
 
         ActivityJoinRecordBo activityJoinRecordBo = new ActivityJoinRecordBo
                 .Builder().activityID(ACTIVITYID).seasonID(activitySeasonBo.getID()).season(activitySeasonBo.getSeason())
-                .createTime(new Date()).score(scoreResult.getScore()).userID(userBo.getID()).build();
+                .score(scoreResult.getScore()).userID(userBo.getID()).build();
         activityJoinRecordDomain.save(activityJoinRecordBo);
         //更新分数
         ActivityParamBo<Integer> activityParamBo = new ActivityParamBo.Builder().activityID(ACTIVITYID)

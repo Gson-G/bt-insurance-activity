@@ -53,7 +53,7 @@ public class LoginController {
             if (!MD5Utils.getMD5String(loginVo.getPassword()).equals(userBo.getPassword())) {
                 return XaResult.error("输入的密码有误");
             }
-            if (DeptType.INTERNAL_COMPANY.equals(userBo.getDeptType())) {
+            if (!DeptType.INTERNAL_COMPANY.equals(userBo.getDeptType())) {
                 return XaResult.error("非内部用户无法登录");
             }
         } else {
