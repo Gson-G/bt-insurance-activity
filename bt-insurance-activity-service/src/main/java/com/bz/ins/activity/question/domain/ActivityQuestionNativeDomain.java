@@ -1,5 +1,6 @@
 package com.bz.ins.activity.question.domain;
 
+import com.bz.ins.activity.activity.bo.ActivityParamBo;
 import com.bz.ins.activity.answer.bo.ActivityAnswerBo;
 import com.bz.ins.activity.answer.domain.AnswerDomain;
 import com.bz.ins.activity.exception.ActivityException;
@@ -12,6 +13,8 @@ import com.bz.ins.activity.question.calculate.CalculateScoreBean;
 import com.bz.ins.activity.question.model.ActivityQuestion;
 import com.bz.ins.activity.question.pojo.QuestionAnswerPojo;
 import com.bz.ins.activity.question.service.QuestionService;
+import com.bz.ins.activity.rank.bo.ActivityRankBo;
+import com.bz.ins.activity.rank.domain.ActivityRankDomain;
 import com.bz.ins.activity.util.ExcelPoji;
 import com.bz.ins.activity.util.ExcelUtil;
 import com.bz.ins.common.utils.BeanUtil;
@@ -49,6 +52,9 @@ public class ActivityQuestionNativeDomain implements ActivityQuestionDomain {
     private AnswerDomain answerDomain;
 
     @Resource
+    private ActivityRankDomain activityRankDomain;
+
+    @Resource
     private ActivityJoinRecordDomain activityJoinRecordDomain;
 
     private final static String QUESTION_CONTENT = "%1$s的花名是什么";
@@ -83,7 +89,7 @@ public class ActivityQuestionNativeDomain implements ActivityQuestionDomain {
      */
     @Override
     public List<QuestionAnswerBo> getQuestionForGame(Integer activity, Integer season) throws ActivityException {
-        List<QuestionAnswerPojo> pojoList = questionService.getTestQuesttions(10);
+        List<QuestionAnswerPojo> pojoList = questionService.getTestQuesttions(activity, season, 10);
         return convertToBo(pojoList);
     }
 
@@ -158,6 +164,23 @@ public class ActivityQuestionNativeDomain implements ActivityQuestionDomain {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 运营个税改革获取题目的策略
+     *
+     * @param activityParamBo
+     * @return
+     * @throws ActivityException
+     */
+    @Override
+    public List<QuestionAnswerBo> getQuestionForTaxGame(ActivityParamBo activityParamBo) throws ActivityException {
+        Integer userID = activityParamBo.getUserID();
+        ActivityRankBo activityRankBo = activityRankDomain.getByID(userID);
+        Integer maxQuestion = null == activityRankBo ? 0 : activityRankBo.getMaxQuestionCode();
+        List<QuestionAnswerPojo> pojoList = questionService.getQuestionForTaxGame(activityParamBo.getActivityID(),
+                activityParamBo.getSeasonID(), maxQuestion, 5);
+        return convertToBo(pojoList);
     }
 
     private void saveQuestion(ExcelPoji excelPoji, List<String> nickNameList, List<String> nameList) {

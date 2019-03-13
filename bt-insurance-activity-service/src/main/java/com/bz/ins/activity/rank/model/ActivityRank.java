@@ -13,7 +13,7 @@ import lombok.experimental.Accessors;
 /**
  * 
  * @author 黄雪冬
- * @date 2019/03/07
+ * @date 2019/03/13
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -68,6 +68,12 @@ public class ActivityRank implements Serializable {
      */
     @TableField("FSeason")
     private Integer season;
+
+    /**
+     * 最大的答题号
+     */
+    @TableField("FMaxQuestionCode")
+    private Integer maxQuestionCode;
 
     /**
      * 创建时间

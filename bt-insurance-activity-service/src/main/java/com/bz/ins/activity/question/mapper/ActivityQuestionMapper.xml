@@ -2,7 +2,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.bz.ins.activity.question.mapper.ActivityQuestionMapper">
 
-
     <resultMap id="BaseResultMap" type="com.bz.ins.activity.question.pojo.QuestionAnswerPojo">
         <id column="FID" jdbcType="INTEGER" property="ID"/>
         <result column="FAnswerID" jdbcType="INTEGER" property="answerID"/>
@@ -14,6 +13,7 @@
         <result column="FWeight" jdbcType="INTEGER" property="weight"/>
         <result column="FCreateTime" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="FLastModifyTime" jdbcType="TIMESTAMP" property="lastModifyTime"/>
+        <result column="FQuestionCode" jdbcType="INTEGER" property="questionCode"/>
         <result column="FIsDelete" jdbcType="BIT" property="isDelete"/>
     </resultMap>
 
@@ -48,16 +48,16 @@
 
     <select id="findQuestionForGame" resultMap="Game_BaseResultMap">
         SELECT
-        q.FID,q.FAnswerID,q.FContent,q.FActivityID,
+        q.FID,q.FAnswerID,q.FContent,q.FActivityID,q.FQuestionCode,
         q.FSeason,q.FSeasonID,q.FScore,q.FWeight,q.FCreateTime,q.FLastModifyTime,q.FIsDelete,
-		a.FID ansFID, a.FQuestionID,a.FCode,
-		a.FContent ansFContent,a.FCreateTime ansFCreateTime,
-		a.FLastModifyTime andFLastModifyTime,a.FIsDelete andFIsdelete
+        a.FID ansFID, a.FQuestionID,a.FCode,
+        a.FContent ansFContent,a.FCreateTime ansFCreateTime,
+        a.FLastModifyTime andFLastModifyTime,a.FIsDelete andFIsdelete
         FROM t_Activity_Question q
         join t_Activity_Answer a ON q.FID = a.FQuestionID
         where q.FIsDelete = 0 AND a.FIsDelete = 0
         <if test="idList != null">
-             AND q.FID in
+            AND q.FID in
             <foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
                 #{item}
             </foreach>
@@ -70,19 +70,19 @@
         q.FID ID,
         (RAND() * q.FWeight) as weight
         FROM t_Activity_Question q
-        where q.FIsDelete = 0
+        where q.FIsDelete = 0 AND q.FSeasonID = #{seasonID, jdbcType=INTEGER} AND q.FActivityID = #{activityID, jdbcType=INTEGER}
         ORDER BY weight DESC
         <if test="num != null">
-        limit #{num, jdbcType=INTEGER}
+            limit #{num, jdbcType=INTEGER}
         </if>
     </select>
     <select id="findAll" resultMap="all_BaseResultMap">
         SELECT
         q.FID,q.FAnswerID,q.FContent,q.FActivityID,
         q.FSeason,q.FSeasonID,q.FScore,q.FWeight,q.FCreateTime,q.FLastModifyTime,q.FIsDelete,
-		a.FID ansFID, a.FQuestionID,a.FCode,
-		a.FContent ansFContent,a.FCreateTime ansFCreateTime,
-		a.FLastModifyTime andFLastModifyTime,a.FIsDelete andFIsdelete
+        a.FID ansFID, a.FQuestionID,a.FCode,
+        a.FContent ansFContent,a.FCreateTime ansFCreateTime,
+        a.FLastModifyTime andFLastModifyTime,a.FIsDelete andFIsdelete
         FROM t_Activity_Question q
         join t_Activity_Answer a ON q.FAnswerID = a.FID
         where q.FIsDelete = 0 AND a.FIsDelete = 0
@@ -90,4 +90,17 @@
             AND q.FID = #{questionID, jdbcType=INTEGER}
         </if>
     </select>
+    <select id="findQuestionForTaxGameIds" resultType="com.bz.ins.activity.question.pojo.QuestionAnswerPojo">
+        SELECT
+        q.FID ID
+        FROM t_Activity_Question q
+        where q.FIsDelete = 0 AND q.FSeasonID = #{seasonID, jdbcType=INTEGER} AND q.FActivityID = #{activityID, jdbcType=INTEGER}
+        AND q.FQuestionCode > #{maxQuestion, jdbcType=INTEGER}
+        ORDER BY FQuestionCode DESC
+        <if test="num != null">
+            limit #{num, jdbcType=INTEGER}
+        </if>
+
+    </select>
+
 </mapper>

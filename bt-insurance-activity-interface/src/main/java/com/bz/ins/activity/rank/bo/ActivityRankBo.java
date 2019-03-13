@@ -60,6 +60,11 @@ public class ActivityRankBo implements Serializable {
     private Integer season;
 
     /**
+     * 最大的答题号
+     */
+    private Integer maxQuestionCode;
+
+    /**
      * 创建时间
      */
     private Date createTime;
@@ -91,6 +96,7 @@ public class ActivityRankBo implements Serializable {
         setActivityID(builder.activityID);
         setSeasonID(builder.seasonID);
         setSeason(builder.season);
+        setMaxQuestionCode(builder.maxQuestionCode);
         setCreateTime(builder.createTime);
         setLastModifyTime(builder.lastModifyTime);
         setIsDelete(builder.isDelete);
@@ -105,6 +111,7 @@ public class ActivityRankBo implements Serializable {
         private Integer activityID;
         private Integer seasonID;
         private Integer season;
+        private Integer maxQuestionCode;
         private Date createTime;
         private Date lastModifyTime;
         private Boolean isDelete;
@@ -145,6 +152,11 @@ public class ActivityRankBo implements Serializable {
 
         public Builder season(Integer val) {
             season = val;
+            return this;
+        }
+
+        public Builder maxQuestionCode(Integer val) {
+            maxQuestionCode = val;
             return this;
         }
 

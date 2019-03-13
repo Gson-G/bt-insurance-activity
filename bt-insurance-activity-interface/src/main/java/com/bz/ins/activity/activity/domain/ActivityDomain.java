@@ -18,11 +18,10 @@ public interface ActivityDomain {
 
     /**
      * 初始化活动
-     * @param activityID 活动id
-     * @param seasonID 赛季id
+     * @param activityParamBo 活动请求参数
      * @return 统一返回类型
      */
-    ActivityResultBo initActivity(Integer activityID, Integer seasonID) throws ActivityException;
+    ActivityResultBo initActivity(ActivityParamBo activityParamBo) throws ActivityException;
 
     /**
      * 获取奖品
@@ -48,19 +47,19 @@ public interface ActivityDomain {
 
     /**
      * 获取具体活动基本信息
-     * @param activityID 活动id
+     * @param activityCode 活动code
      * @param seasonID 赛季id
      * @return 统一返回类型
      */
-    ActivityResultBo getActivityMessage(Integer activityID, Integer seasonID) throws ActivityException;
+    ActivityResultBo getActivityMessage(String activityCode, Integer seasonID) throws ActivityException;
 
 
     /**
      * 通过活动id 获取当前正在进行的期数等信息
-     * @param activityID 活动id
+     * @param activityCode 活动code
      * @return  ActivityResultBo
      */
-    ActivityResultBo getCurrentActivity(Integer activityID) throws ActivityException;
+    ActivityResultBo getCurrentActivity(String activityCode) throws ActivityException;
 
     /**
      *

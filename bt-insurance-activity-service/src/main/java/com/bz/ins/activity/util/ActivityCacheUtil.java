@@ -51,7 +51,7 @@ public class ActivityCacheUtil {
      * @param seasonID
      * @return
      */
-    public ActivityBo getActivityMessageCache(Integer activityID, Integer seasonID) throws ActivityException {
+    private ActivityBo getActivityMessageCache(Integer activityID, Integer seasonID) throws ActivityException {
         String key = ActivityContants.getActivityMessageCacheKey(activityID, seasonID);
         //String result = redisTemplate.opsForValue().get(key);
         ActivityBo result = getCache(key);
@@ -79,6 +79,40 @@ public class ActivityCacheUtil {
         return null;
     }
 
+    /**
+     * 获取活动信息 从缓存中
+     * @param activityCode
+     * @return
+     */
+    public ActivityBo getActivityMessageCache(String activityCode) throws ActivityException {
+        String key = ActivityContants.getActivityMessageCacheKey(activityCode);
+        ActivityBo result = getCache(key);
+        if (null != result) {
+            return result;
+        }
+        Activity activity = activityService.getByCode(activityCode);
+        if (null == activity) {
+            return null;
+        }
+        ActivityBo activityBo = BeanUtil.convert(activity, ActivityBo.class);
+        ActivitySeasonBo activitySeasonBo = activitySeasonService.getCurrentSeason(activityBo.getID());
+        Integer seasonID =  null == activitySeasonBo ? null : activitySeasonBo.getID();
+
+        //限制条件放入缓存
+        if (null != seasonID) {
+            List<ActivityFilterBo> activityFilterBos = activityFilterDomain
+                    .getFilterByActivityIDAndSeasonID(activity.getID(),seasonID);
+            activityBo.setFilterBoList(activityFilterBos);
+        }
+
+        ActivityResultBo<ActivityBo> activityResultBo = ActivityUtil.getStrategy(activityBo.getActivityStratey())
+                .cacheActivity(new ActivityParamBo(activityBo, activity.getID(), seasonID));
+        if (ActivityResultBo.isSuccess(activityResultBo)) {
+            putCache(activityResultBo.getObject(), key);
+            return activityResultBo.getObject();
+        }
+        return null;
+    }
 
     private ActivityBo getCache(String key) {
         String result = cache.get(key);
@@ -94,7 +128,7 @@ public class ActivityCacheUtil {
     }
 
     private void putCache(ActivityBo activityBo, String key) {
-        Long exptime = System.currentTimeMillis() + 1000 * 60 * 10;
+        Long exptime = System.currentTimeMillis() + 1000 * 60 * 1;
         CacheInfoPojo<ActivityBo> cacheInfoPojo = new CacheInfoPojo<>(exptime, activityBo);
         cache.put(key, JSON.toJSONString(cacheInfoPojo));
     }
@@ -107,7 +141,6 @@ public class ActivityCacheUtil {
             CacheInfoPojo<ActivitySeasonBo> cacheInfoPojo = JSON.parseObject(result, new TypeReference<CacheInfoPojo<ActivitySeasonBo>>(){});
             Long currentTime = System.currentTimeMillis();
             if (cacheInfoPojo.getExpTime() < System.currentTimeMillis()) {
-                activitySeasonService.getCurrentSeason(activityID);
                 return getFromDbThenCache(activityID);
             }
             ActivitySeasonBo activitySeasonBo = cacheInfoPojo.getObject();
@@ -129,7 +162,7 @@ public class ActivityCacheUtil {
             cache.put(ActivityContants.getActivitySeasonCahcheKey(activityID), JSON.toJSONString(cacheInfoPojo));
             return activitySeasonBo;
         }
-        throw new ActivityException("没有正在进行的活动");
+        return null;
 
     }
 

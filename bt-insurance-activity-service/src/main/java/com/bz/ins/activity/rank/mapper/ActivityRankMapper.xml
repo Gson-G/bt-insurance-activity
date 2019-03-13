@@ -1,11 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.bz.ins.activity.rank.mapper.ActivityRankMapper">
+
+
     <update id="updateRank">
         update t_Activity_Rank set FLastScore = FTotalSCore, FLastModifyTime = now(),
         FTotalSCore = FTotalSCore + #{score, jdbcType = INTEGER}
         where FID = #{id, jdbcType=INTEGER}
+    </update>
 
+    <update id="updateRankTax">
+        update t_Activity_Rank set FLastScore = FTotalSCore, FLastModifyTime = now(),
+        FTotalSCore = FTotalSCore + #{score, jdbcType = INTEGER},
+        FMaxQuestionCode = #{maxQuestionCode, jdbcType = INTEGER},
+        where FID = #{id, jdbcType=INTEGER}
     </update>
 
     <select id="getRankList" resultType="com.bz.ins.activity.rank.bo.ActivityRankBo">
@@ -94,5 +102,4 @@ FROM
 	) t3,
 	( SELECT ( @rowNum := 0 ) ) b
     </select>
-
 </mapper>

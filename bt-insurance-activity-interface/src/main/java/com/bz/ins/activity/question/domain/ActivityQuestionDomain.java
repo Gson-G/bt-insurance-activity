@@ -1,5 +1,6 @@
 package com.bz.ins.activity.question.domain;
 
+import com.bz.ins.activity.activity.bo.ActivityParamBo;
 import com.bz.ins.activity.exception.ActivityException;
 import com.bz.ins.activity.question.bo.ActivityQuestionBo;
 import com.bz.ins.activity.question.bo.QuestionAnswerBo;
@@ -71,6 +72,16 @@ public interface ActivityQuestionDomain {
 
 
     void initAnswer();
+
+
+    /**
+     * 运营个税改革获取题目的策略
+     * @param activityParamBo
+     * @return
+     * @throws ActivityException
+     */
+    List<QuestionAnswerBo> getQuestionForTaxGame(ActivityParamBo activityParamBo) throws ActivityException;
+
 
 
 

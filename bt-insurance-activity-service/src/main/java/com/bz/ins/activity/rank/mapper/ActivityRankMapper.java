@@ -9,13 +9,14 @@ import java.util.List;
 
 public interface ActivityRankMapper extends BaseMapper<ActivityRank> {
 
-
-
     List<ActivityRankBo> getRankList(@Param("activityID") Integer activityID, @Param("seasonID") Integer seasonID);
 
     Integer getUserRank(@Param("totalScore")Integer totalScore, @Param("activityID") Integer activityID, @Param("seasonID") Integer seasonID);
 
     Integer updateRank(@Param("id")Integer id, @Param("score")Integer score);
 
+    Integer updateRankTax(@Param("id")Integer id, @Param("score")Integer score, @Param("maxQuestionCode")Integer maxQuestionCode);
+
     List<ActivityRankBo> getUserRankList(@Param("totalScore")Integer totalScore, @Param("activityID") Integer activityID, @Param("seasonID") Integer seasonID);
+
 }

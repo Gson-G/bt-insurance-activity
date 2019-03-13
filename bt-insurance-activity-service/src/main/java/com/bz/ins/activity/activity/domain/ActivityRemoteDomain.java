@@ -22,16 +22,16 @@ public class ActivityRemoteDomain implements ActivityDomain{
     @Resource
     private ActivityDomain activityDomain;
 
+
     /**
      * 初始化活动
      *
-     * @param activityID 活动id
-     * @param seasonID   赛季id
+     * @param activityParamBo 活动请求参数
      * @return 统一返回类型
      */
     @Override
-    public ActivityResultBo initActivity(Integer activityID, Integer seasonID) throws ActivityException {
-        return activityDomain.initActivity(activityID, seasonID);
+    public ActivityResultBo initActivity(ActivityParamBo activityParamBo) throws ActivityException {
+        return activityDomain.initActivity(activityParamBo);
     }
 
     /**
@@ -70,24 +70,24 @@ public class ActivityRemoteDomain implements ActivityDomain{
     /**
      * 获取具体活动基本信息
      *
-     * @param activityID 活动id
-     * @param seasonID   赛季id
+     * @param activityCode 活动code
+     * @param seasonID     赛季id
      * @return 统一返回类型
      */
     @Override
-    public ActivityResultBo getActivityMessage(Integer activityID, Integer seasonID) throws ActivityException {
-        return activityDomain.getActivityMessage(activityID, seasonID);
+    public ActivityResultBo getActivityMessage(String activityCode, Integer seasonID) throws ActivityException {
+        return activityDomain.getActivityMessage(activityCode, seasonID);
     }
 
     /**
      * 通过活动id 获取当前正在进行的期数等信息
      *
-     * @param activityID 活动id
+     * @param activityCode 活动code
      * @return ActivityResultBo
      */
     @Override
-    public ActivityResultBo getCurrentActivity(Integer activityID) throws ActivityException {
-        return activityDomain.getCurrentActivity(activityID);
+    public ActivityResultBo getCurrentActivity(String activityCode) throws ActivityException {
+        return activityDomain.getCurrentActivity(activityCode);
     }
 
     /**

@@ -25,6 +25,11 @@ public class ActivityQuestionBo implements Serializable {
     private Integer ID;
 
     /**
+     * 题目编号--运营个税活动
+     */
+    private Integer questionCode;
+
+    /**
      * 正确答案id
      */
     private Integer answerID;
@@ -77,6 +82,7 @@ public class ActivityQuestionBo implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private ActivityQuestionBo(Builder builder) {
+        setQuestionCode(builder.questionCode);
         setAnswerID(builder.answerID);
         setContent(builder.content);
         setActivityID(builder.activityID);
@@ -91,6 +97,7 @@ public class ActivityQuestionBo implements Serializable {
 
 
     public static final class Builder {
+        private Integer questionCode;
         private Integer answerID;
         private String content;
         private Integer activityID;
@@ -103,6 +110,11 @@ public class ActivityQuestionBo implements Serializable {
         private Boolean isDelete;
 
         public Builder() {
+        }
+
+        public Builder questionCode(Integer val) {
+            questionCode = val;
+            return this;
         }
 
         public Builder answerID(Integer val) {

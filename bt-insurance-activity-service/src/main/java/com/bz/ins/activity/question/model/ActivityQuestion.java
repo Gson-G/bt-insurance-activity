@@ -13,7 +13,7 @@ import lombok.experimental.Accessors;
 /**
  * 
  * @author 黄雪冬
- * @date 2019/03/01
+ * @date 2019/03/13
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -26,6 +26,12 @@ public class ActivityQuestion implements Serializable {
      */
     @TableId(value = "FID", type = IdType.AUTO)
     private Integer ID;
+
+    /**
+     * 题目编号--运营个税活动
+     */
+    @TableField("FQuestionCode")
+    private Integer questionCode;
 
     /**
      * 正确答案id

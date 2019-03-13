@@ -33,18 +33,16 @@ public class ActivityNativeDomain implements ActivityDomain{
 
     /**
      * 初始化活动
-     * @param activityID 活动id
-     * @param seasonID 赛季id
+     * @param activityParamBo 活动参数
      * @return 统一返回类型
      */
     @Override
-    public ActivityResultBo initActivity(Integer activityID, Integer seasonID) throws ActivityException {
-        ActivityBo activityBo = activityCacheUtil.getActivityMessageCache(activityID, seasonID);
+    public ActivityResultBo initActivity(ActivityParamBo activityParamBo) throws ActivityException {
+        ActivityBo activityBo = activityCacheUtil.getActivityMessageCache(activityParamBo.getActivityCode());
         if (null == activityBo) {
             return ActivityResultBo.fail();
         }
-        return ActivityUtil.getStrategy(activityBo.getActivityStratey()).initActivity(
-                new ActivityParamBo.Builder<ActivityBo>().activityID(activityID).seasonID(seasonID).build());
+        return ActivityUtil.getStrategy(activityBo.getActivityStratey()).initActivity(activityParamBo);
     }
 
     /**
@@ -67,7 +65,7 @@ public class ActivityNativeDomain implements ActivityDomain{
     @Override
     public ActivityResultBo getReady(ActivityParamBo activityParamBo) throws ActivityException {
         ActivityBo activityBo = activityCacheUtil
-                .getActivityMessageCache(activityParamBo.getActivityID(), activityParamBo.getSeasonID());
+                .getActivityMessageCache(activityParamBo.getActivityCode());
         if (null == activityBo) {
             return ActivityResultBo.fail();
         }
@@ -92,14 +90,13 @@ public class ActivityNativeDomain implements ActivityDomain{
     /**
      * 获取具体活动基本信息
      *
-     * @param activityID 活动id
+     * @param activityCode 活动id
      * @param seasonID   赛季id
      * @return 统一返回类型
      */
     @Override
-    public ActivityResultBo getActivityMessage(Integer activityID, Integer seasonID) throws ActivityException {
-        ActivityBo activityBo = activityCacheUtil
-                .getActivityMessageCache(activityID, seasonID);
+    public ActivityResultBo getActivityMessage(String activityCode, Integer seasonID) throws ActivityException {
+        ActivityBo activityBo = activityCacheUtil.getActivityMessageCache(activityCode);
 
         return null == activityBo ? ActivityResultBo.fail() : ActivityResultBo.success(activityBo);
     }
@@ -107,12 +104,16 @@ public class ActivityNativeDomain implements ActivityDomain{
     /**
      * 通过活动id 获取当前正在进行的期数等信息
      *
-     * @param activityID 活动id
+     * @param activityCode 活动code
      * @return ActivityResultBo
      */
     @Override
-    public ActivityResultBo getCurrentActivity(Integer activityID) throws ActivityException {
-        return null;
+    public ActivityResultBo getCurrentActivity(String activityCode) throws ActivityException {
+        ActivityBo activityBo = activityCacheUtil.getActivityMessageCache(activityCode);
+        if (null == activityBo) {
+            return ActivityResultBo.fail();
+        }
+        return ActivityResultBo.success(activityBo);
     }
 
     /**

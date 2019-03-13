@@ -9,7 +9,7 @@
 
         FROM t_Activity_Season
         where FEndTime > now() AND FStartTime &lt; now() And FActivityID = #{activityID, jdbcType=INTEGER}
-        AND FIsDelete = 0
+        AND FIsDelete = 0 order by FID desc limit 1
 
     </select>
 

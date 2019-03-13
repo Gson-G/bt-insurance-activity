@@ -1,7 +1,9 @@
 package com.bz.ins.activity.activity.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.bz.ins.activity.activity.mapper.ActivityMapper;
 import com.bz.ins.activity.activity.model.Activity;
+import com.bz.ins.activity.rank.model.ActivityRank;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -23,6 +25,11 @@ public class ActivityService {
 
     public Activity getByID(Integer activityID) {
         return activityMapper.selectById(activityID);
+    }
+
+    public Activity getByCode(String activityCode) {
+        return activityMapper.selectOne(new QueryWrapper<Activity>().lambda()
+                .eq(Activity :: getCode, activityCode));
     }
 
 

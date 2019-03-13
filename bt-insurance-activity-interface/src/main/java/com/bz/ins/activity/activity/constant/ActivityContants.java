@@ -43,6 +43,15 @@ public class ActivityContants {
     }
 
     /**
+     * 活动缓存信息key
+     * @param activityCode 活动code
+     * @return
+     */
+    public static String getActivityMessageCacheKey(String activityCode) {
+        return ACTIVITY_MESSAGE_CACHE_KEY + activityCode;
+    }
+
+    /**
      * 活动题库缓存cache
      * @param activityID
      * @param seasonID

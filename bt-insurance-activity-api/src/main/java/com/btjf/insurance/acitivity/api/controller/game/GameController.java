@@ -6,6 +6,7 @@ import com.btjf.insurance.acitivity.api.token.RequestTokenManage;
 import com.btjf.insurance.acitivity.api.vo.*;
 import com.btjf.insurance.user.bo.UserBo;
 import com.btjf.insurance.user.domain.UserDomain;
+import com.bz.ins.activity.activity.bo.ActivityBo;
 import com.bz.ins.activity.activity.bo.ActivityParamBo;
 import com.bz.ins.activity.activity.bo.ActivityResultBo;
 import com.bz.ins.activity.activity.domain.ActivityDomain;
@@ -44,7 +45,7 @@ import java.util.List;
 @RequestMapping("/game")
 public class GameController extends BaseController {
 
-    private final static Integer ACTIVITYID = 1;
+    private final static String ACTIVITYID_CODE = "TUzwrPIAnn75Y5NR";
 
 
     @Reference(version = "1.0.0", timeout = 5000)
@@ -91,12 +92,14 @@ public class GameController extends BaseController {
 
     @GetMapping("/getQuestion")
     public XaResult<List<QuestionVo>> getQuestion() throws ActivityException {
-        ActivitySeasonBo activitySeasonBo = activitySeasonDomain.getCurrentSeason(ACTIVITYID);
-        if (null == activitySeasonBo) {
+        ActivityResultBo<ActivityBo> activityResultBo = activityDomain.getCurrentActivity(ACTIVITYID_CODE);
+        if (!ActivityResultBo.isSuccess(activityResultBo) || null == activityResultBo.getObject().getActivitySeasonBo()) {
             return XaResult.error("没有正在进行的活动");
         }
+        ActivitySeasonBo activitySeasonBo = activityResultBo.getObject().getActivitySeasonBo();
+
         ActivityParamBo activityParamBo = new ActivityParamBo.Builder()
-                .activityID(ACTIVITYID).seasonID(activitySeasonBo.getID()).build();
+                .activityCode(ACTIVITYID_CODE).seasonID(activitySeasonBo.getID()).build();
         ActivityResultBo<List<QuestionAnswerBo>> questions = activityDomain.getReady(activityParamBo);
         List<QuestionAnswerBo> boList = questions.getObject();
         List<QuestionVo> voList = QuestionVo.convertToList(boList);
@@ -116,20 +119,23 @@ public class GameController extends BaseController {
 
         //校验requestToken
         requestTokenManage.getAndValidate(requestToken);
-        ActivitySeasonBo activitySeasonBo = activitySeasonDomain.getCurrentSeason(ACTIVITYID);
-        if (null == activitySeasonBo) {
+        ActivityResultBo<ActivityBo> activityResultBo = activityDomain.getCurrentActivity(ACTIVITYID_CODE);
+        if (!ActivityResultBo.isSuccess(activityResultBo) || null == activityResultBo.getObject().getActivitySeasonBo()) {
             return XaResult.error("没有正在进行的活动");
         }
+        ActivityBo activityBo = activityResultBo.getObject();
+        ActivitySeasonBo activitySeasonBo = activityBo.getActivitySeasonBo();
+
         UserBo userBo = getUser();
         List<QuestionScoreBo> boList = CustomerAnswerVo.converToList(customerAnswerListVo.getAnswers());
         ScoreResult scoreResult = activityQuestionDomain.calScoreTotal(boList);
 
         ActivityJoinRecordBo activityJoinRecordBo = new ActivityJoinRecordBo
-                .Builder().activityID(ACTIVITYID).seasonID(activitySeasonBo.getID()).season(activitySeasonBo.getSeason())
+                .Builder().activityID(activityBo.getID()).seasonID(activitySeasonBo.getID()).season(activitySeasonBo.getSeason())
                 .score(scoreResult.getScore()).userID(userBo.getID()).build();
         activityJoinRecordDomain.save(activityJoinRecordBo);
         //更新分数
-        ActivityParamBo<Integer> activityParamBo = new ActivityParamBo.Builder().activityID(ACTIVITYID)
+        ActivityParamBo<Integer> activityParamBo = new ActivityParamBo.Builder().activityID(activityBo.getID())
                 .seasonID(activitySeasonBo.getID()).userID(userBo.getID())
                 .season(activitySeasonBo.getSeason()).object(scoreResult.getScore()).userName(userBo.getRealName()).build();
         activityRankDomain.updateRank(activityParamBo);
@@ -139,12 +145,14 @@ public class GameController extends BaseController {
 
     @GetMapping("/rank")
     public XaResult<List<RankVo>> getRank() throws ActivityException{
-        ActivitySeasonBo activitySeasonBo = activitySeasonDomain.getCurrentSeason(ACTIVITYID);
-        if (null == activitySeasonBo) {
+        ActivityResultBo<ActivityBo> activityResultBo = activityDomain.getCurrentActivity(ACTIVITYID_CODE);
+        if (!ActivityResultBo.isSuccess(activityResultBo) || null == activityResultBo.getObject().getActivitySeasonBo()) {
             return XaResult.error("没有正在进行的活动");
         }
-        List<ActivityRankBo> activityRankBoList = activityRankDomain.getRankList(ACTIVITYID, activitySeasonBo.getID());
+        ActivityBo activityBo = activityResultBo.getObject();
+        ActivitySeasonBo activitySeasonBo = activityBo.getActivitySeasonBo();
 
+        List<ActivityRankBo> activityRankBoList = activityRankDomain.getRankList(activityBo.getID(), activitySeasonBo.getID());
         List<RankVo> rankVoList = RankVo.convertToList(activityRankBoList);
 
         return XaResult.success(rankVoList);
@@ -152,17 +160,18 @@ public class GameController extends BaseController {
 
     @GetMapping("/user")
     public XaResult<RankVo> getUserMessage() throws ActivityException{
-        ActivitySeasonBo activitySeasonBo = activitySeasonDomain.getCurrentSeason(ACTIVITYID);
-        if (null == activitySeasonBo) {
+        ActivityResultBo<ActivityBo> activityResultBo = activityDomain.getCurrentActivity(ACTIVITYID_CODE);
+        if (!ActivityResultBo.isSuccess(activityResultBo) || null == activityResultBo.getObject().getActivitySeasonBo()) {
             return XaResult.error("没有正在进行的活动");
         }
+        ActivityBo activityBo = activityResultBo.getObject();
+        ActivitySeasonBo activitySeasonBo = activityBo.getActivitySeasonBo();
         //排名信息
         UserRankBo userRank = activityRankDomain
-                .getUserRank(getCurrentUserID(), ACTIVITYID, activitySeasonBo.getID());
+                .getUserRank(getCurrentUserID(), activityBo.getID(), activitySeasonBo.getID());
 
         //活动信息
         UserBo userBo = userDomain.get(getCurrentUserID());
-        ActivityResultBo activityResultBo = activityDomain.getActivityMessage(ACTIVITYID, activitySeasonBo.getID());
 
         return XaResult.success(new RankVo(userBo, userRank, activityResultBo));
     }

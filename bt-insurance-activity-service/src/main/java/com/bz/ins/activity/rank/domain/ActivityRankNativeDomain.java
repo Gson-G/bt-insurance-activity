@@ -139,7 +139,9 @@ public class ActivityRankNativeDomain implements ActivityRankDomain{
                 throw new ActivityException("网络繁忙请稍后重试");
             }
         } finally {
-            commonRedisHelper.releaseLock(key, lock);
+            if (lock.isLockSuccess()) {
+                commonRedisHelper.releaseLock(key, lock);
+            }
         }
     }
 }

@@ -7,7 +7,6 @@ import com.bz.ins.activity.activity.service.ActivityService;
 import com.bz.ins.activity.activity.strategy.DefaultActivityStrategy;
 import com.bz.ins.activity.question.bo.QuestionAnswerBo;
 import com.bz.ins.activity.question.domain.ActivityQuestionDomain;
-import com.bz.ins.activity.question.pojo.QuestionAnswerPojo;
 import com.bz.ins.activity.question.service.QuestionService;
 import com.bz.ins.activity.season.bo.ActivitySeasonBo;
 import com.bz.ins.activity.season.model.ActivitySeason;
@@ -20,15 +19,14 @@ import java.util.List;
 
 /**
  * @author kantenmei
- * @date 2019/3/4
- * @time 3:36 PM
+ * @date 2019/3/13
+ * @time 2:12 PM
  * @function 功能：
  * @describe 版本描述：
  * @modifyLog 修改日志：
  */
-@Service("questionActivity")
-public class QuestionActvityStrategy extends DefaultActivityStrategy {
-
+@Service("taxQuestionActivity")
+public class TaxQuestionActivityStrategy extends DefaultActivityStrategy {
 
     @Resource
     private ActivityService activityService;
@@ -42,6 +40,9 @@ public class QuestionActvityStrategy extends DefaultActivityStrategy {
     @Resource
     private ActivityQuestionDomain activityQuestionDomain;
 
+    @Resource
+    private QuestionActvityStrategy questionActvityStrategy;
+
     /**
      * 缓存活动信息 不通活动可能缓存的不同
      *
@@ -50,17 +51,7 @@ public class QuestionActvityStrategy extends DefaultActivityStrategy {
      */
     @Override
     public ActivityResultBo cacheActivity(ActivityParamBo activityParamBo) {
-        ActivityBo activityBo = ((ActivityParamBo<ActivityBo>) activityParamBo).getObject();
-        if (null == activityParamBo.getSeasonID()) {
-            return ActivityResultBo.success(activityBo);
-        }
-        ActivitySeason activitySeason = activitySeasonService.getByID(activityParamBo.getSeasonID());
-        if (null ==  activitySeason) {
-            return ActivityResultBo.fail();
-        }
-        activityBo.setActivitySeasonBo(BeanUtil.convert(activityBo, ActivitySeasonBo.class));
-
-        return ActivityResultBo.success(activityBo);
+        return questionActvityStrategy.cacheActivity(activityParamBo);
     }
 
     /**
@@ -71,7 +62,7 @@ public class QuestionActvityStrategy extends DefaultActivityStrategy {
      */
     @Override
     public ActivityResultBo initActivity(ActivityParamBo activityParamBo) {
-       // List<QuestionAnswerPojo> pojoList = questionService.queryAll();
+        // List<QuestionAnswerPojo> pojoList = questionService.queryAll();
 
 
         return null;
@@ -81,31 +72,25 @@ public class QuestionActvityStrategy extends DefaultActivityStrategy {
     /**
      * 准备开始玩游戏
      *
-     * @param activityParamBo activityID 活动id seasonID 赛季id
+     * @param activityParamBo activityID 活动id seasonID 赛季id userID
      * @return
      */
     @Override
     public ActivityResultBo getReady(ActivityParamBo activityParamBo) {
         List<QuestionAnswerBo> boList = activityQuestionDomain
-                .getQuestionForGame(activityParamBo.getActivityID(), activityParamBo.getSeasonID());
+                .getQuestionForTaxGame(activityParamBo);
 
         return ActivityResultBo.success(boList);
     }
 
     /**
-     * 准备开始玩游戏
+     * filter
      *
-     * @param activityParamBo@return
+     * @param activityParamBo
+     * @return
      */
     @Override
     public ActivityResultBo filter(ActivityParamBo activityParamBo) {
         return null;
     }
-
-
-
-
-
-
-
 }

@@ -1,5 +1,6 @@
 package com.bz.ins.activity.question.service;
 
+import com.bz.ins.activity.question.bo.QuestionAnswerBo;
 import com.bz.ins.activity.question.mapper.ActivityQuestionMapper;
 import com.bz.ins.activity.question.model.ActivityQuestion;
 import com.bz.ins.activity.question.pojo.QuestionAnswerPojo;
@@ -46,8 +47,8 @@ public class QuestionService {
      * 获取考试题目
      * @return
      */
-    public List<QuestionAnswerPojo> getTestQuesttions(Integer number) {
-        List<QuestionAnswerPojo> questionAnswerPojos = activityQuestionMapper.findQuestionForGameIds(number);
+    public List<QuestionAnswerPojo> getTestQuesttions(Integer activityID, Integer seasonID, Integer number) {
+        List<QuestionAnswerPojo> questionAnswerPojos = activityQuestionMapper.findQuestionForGameIds(activityID, seasonID, number);
         if (CollectionUtils.isEmpty(questionAnswerPojos)) {
             return Lists.newArrayList();
         }
@@ -61,5 +62,15 @@ public class QuestionService {
 
     public void updateRightAnswer(Integer answerID, Integer id) {
         activityQuestionMapper.updateRightAnswer(answerID, id);
+    }
+
+    public List<QuestionAnswerPojo> getQuestionForTaxGame(Integer activityID, Integer seasonID, Integer maxQuestion, Integer number) {
+        List<QuestionAnswerPojo> questionAnswerPojos = activityQuestionMapper
+                .findQuestionForTaxGameIds(activityID, seasonID, maxQuestion, number);
+        if (CollectionUtils.isEmpty(questionAnswerPojos)) {
+            return Lists.newArrayList();
+        }
+        List<Integer> idList = questionAnswerPojos.stream().map(QuestionAnswerPojo :: getID).collect(Collectors.toList());
+        return activityQuestionMapper.findQuestionForGame(idList);
     }
 }

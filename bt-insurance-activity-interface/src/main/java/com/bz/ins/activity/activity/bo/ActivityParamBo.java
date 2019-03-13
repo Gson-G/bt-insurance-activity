@@ -36,6 +36,8 @@ public class ActivityParamBo<T extends Serializable> implements Serializable {
 
     private ActivityBo activityBo;
 
+    private String activityCode;
+
 
     public ActivityParamBo() {
     }
@@ -60,6 +62,7 @@ public class ActivityParamBo<T extends Serializable> implements Serializable {
         setSeason(builder.season);
         setPrizeStrategy(builder.prizeStrategy);
         setActivityBo(builder.activityBo);
+        setActivityCode(builder.activityCode);
     }
 
 
@@ -73,6 +76,7 @@ public class ActivityParamBo<T extends Serializable> implements Serializable {
         private Integer season;
         private String prizeStrategy;
         private ActivityBo activityBo;
+        private String activityCode;
 
         public Builder() {
         }
@@ -119,6 +123,11 @@ public class ActivityParamBo<T extends Serializable> implements Serializable {
 
         public Builder activityBo(ActivityBo val) {
             activityBo = val;
+            return this;
+        }
+
+        public Builder activityCode(String val) {
+            activityCode = val;
             return this;
         }
 
