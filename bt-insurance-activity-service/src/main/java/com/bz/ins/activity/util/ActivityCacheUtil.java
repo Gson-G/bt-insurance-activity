@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -58,8 +57,6 @@ public class ActivityCacheUtil {
             return result;
         }
 
-        LinkedHashMap linkedHashMap = new LinkedHashMap();
-
         //加锁再请求db
         RedisLockResult lock = commonRedisHelper.lock(key, 3000l);
         try {
@@ -89,7 +86,7 @@ public class ActivityCacheUtil {
     }
 
     private void putCache(ActivityBo activityBo, String key) {
-        Long exptime = System.currentTimeMillis() + 1000 * 60 * 1;
+        Long exptime = System.currentTimeMillis() + 1000 * 60 * 15;
         CacheInfoPojo<ActivityBo> cacheInfoPojo = new CacheInfoPojo<>(exptime, activityBo);
         cache.put(key, JSON.toJSONString(cacheInfoPojo));
     }
