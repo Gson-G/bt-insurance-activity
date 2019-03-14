@@ -58,7 +58,7 @@ public class QuestionActvityStrategy extends DefaultActivityStrategy {
         if (null ==  activitySeason) {
             return ActivityResultBo.fail();
         }
-        activityBo.setActivitySeasonBo(BeanUtil.convert(activityBo, ActivitySeasonBo.class));
+        activityBo.setActivitySeasonBo(BeanUtil.convert(activitySeason, ActivitySeasonBo.class));
 
         return ActivityResultBo.success(activityBo);
     }
