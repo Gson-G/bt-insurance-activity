@@ -5,6 +5,7 @@ import com.btjf.application.util.XaResult;
 import com.btjf.insurance.acitivity.api.interceptor.RefreshDealerCacheInterceptor;
 import com.btjf.insurance.user.bo.UserBo;
 import com.bz.ins.activity.exception.ActivityException;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -30,6 +31,9 @@ public class BaseController<T> {
      *
      */
     private static final Logger logger = LoggerFactory.getLogger(BaseController.class);
+
+
+    private static final String ACTCODE = "actCode";
 
 
     @ExceptionHandler({ActivityException.class})
@@ -74,6 +78,21 @@ public class BaseController<T> {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
                 .getRequestAttributes()).getRequest();
         return (UserBo) request.getAttribute(RefreshDealerCacheInterceptor.MEMBER);
+    }
+
+    /**
+     * 获取活动code
+     *
+     * @return
+     */
+    public String getActCode() {
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
+                .getRequestAttributes()).getRequest();
+        String actcode = request.getHeader(ACTCODE);
+        if (StringUtils.isBlank(actcode)) {
+            throw new ActivityException("活动code无效");
+        }
+        return actcode;
     }
 
 

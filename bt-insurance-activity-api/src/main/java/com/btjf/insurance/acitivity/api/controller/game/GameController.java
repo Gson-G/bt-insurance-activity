@@ -45,7 +45,7 @@ import java.util.List;
 @RequestMapping("/game")
 public class GameController extends BaseController {
 
-    private final static String ACTIVITYID_CODE = "TUzwrPIAnn75Y5NR";
+    //private final static String ACTIVITYID_CODE = "TUzwrPIAnn75Y5NR";
 
 
     @Reference(version = "1.0.0", timeout = 5000)
@@ -92,14 +92,14 @@ public class GameController extends BaseController {
 
     @GetMapping("/getQuestion")
     public XaResult<List<QuestionVo>> getQuestion() throws ActivityException {
-        ActivityResultBo<ActivityBo> activityResultBo = activityDomain.getCurrentActivity(ACTIVITYID_CODE);
+        ActivityResultBo<ActivityBo> activityResultBo = activityDomain.getCurrentActivity(getActCode());
         if (!ActivityResultBo.isSuccess(activityResultBo) || null == activityResultBo.getObject().getActivitySeasonBo()) {
             return XaResult.error("没有正在进行的活动");
         }
         ActivitySeasonBo activitySeasonBo = activityResultBo.getObject().getActivitySeasonBo();
 
         ActivityParamBo activityParamBo = new ActivityParamBo.Builder()
-                .activityCode(ACTIVITYID_CODE).seasonID(activitySeasonBo.getID()).build();
+                .activityCode(getActCode()).seasonID(activitySeasonBo.getID()).build();
         ActivityResultBo<List<QuestionAnswerBo>> questions = activityDomain.getReady(activityParamBo);
         List<QuestionAnswerBo> boList = questions.getObject();
         List<QuestionVo> voList = QuestionVo.convertToList(boList);
@@ -119,7 +119,7 @@ public class GameController extends BaseController {
 
         //校验requestToken
         requestTokenManage.getAndValidate(requestToken);
-        ActivityResultBo<ActivityBo> activityResultBo = activityDomain.getCurrentActivity(ACTIVITYID_CODE);
+        ActivityResultBo<ActivityBo> activityResultBo = activityDomain.getCurrentActivity(getActCode());
         if (!ActivityResultBo.isSuccess(activityResultBo) || null == activityResultBo.getObject().getActivitySeasonBo()) {
             return XaResult.error("没有正在进行的活动");
         }
@@ -145,7 +145,7 @@ public class GameController extends BaseController {
 
     @GetMapping("/rank")
     public XaResult<List<RankVo>> getRank() throws ActivityException{
-        ActivityResultBo<ActivityBo> activityResultBo = activityDomain.getCurrentActivity(ACTIVITYID_CODE);
+        ActivityResultBo<ActivityBo> activityResultBo = activityDomain.getCurrentActivity(getActCode());
         if (!ActivityResultBo.isSuccess(activityResultBo) || null == activityResultBo.getObject().getActivitySeasonBo()) {
             return XaResult.error("没有正在进行的活动");
         }
@@ -160,7 +160,7 @@ public class GameController extends BaseController {
 
     @GetMapping("/user")
     public XaResult<RankVo> getUserMessage() throws ActivityException{
-        ActivityResultBo<ActivityBo> activityResultBo = activityDomain.getCurrentActivity(ACTIVITYID_CODE);
+        ActivityResultBo<ActivityBo> activityResultBo = activityDomain.getCurrentActivity(getActCode());
         if (!ActivityResultBo.isSuccess(activityResultBo) || null == activityResultBo.getObject().getActivitySeasonBo()) {
             return XaResult.error("没有正在进行的活动");
         }
