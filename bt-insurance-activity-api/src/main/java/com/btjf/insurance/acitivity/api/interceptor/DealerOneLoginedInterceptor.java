@@ -24,7 +24,7 @@ import java.io.IOException;
 @Component
 public class DealerOneLoginedInterceptor implements HandlerInterceptor {
 
-    private Logger logger = LoggerFactory.getLogger(DealerOneLoginedInterceptor.class);
+    private final Logger logger = LoggerFactory.getLogger(DealerOneLoginedInterceptor.class);
 
     public static final String ACCESS_TOKEN = "AccessToken";
 
@@ -35,6 +35,7 @@ public class DealerOneLoginedInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String accessToken = request.getHeader(ACCESS_TOKEN);
         if (StringUtils.isEmpty(accessToken)) {
+            logger.info("no token request");
             convertResponse(response, HttpStatus.PAYMENT_REQUIRED, XaResult.unloginForNoAccessToken());
             return false;
         }
@@ -51,15 +52,4 @@ public class DealerOneLoginedInterceptor implements HandlerInterceptor {
         response.setContentType("text/xml;charset=UTF-8");
         response.getOutputStream().write(JSONUtils.toJSONByJackson(xaResult).getBytes("UTF-8"));
     }
-
-    @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-
-    }
-
-    @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-
-    }
-
 }

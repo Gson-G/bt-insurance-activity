@@ -19,7 +19,7 @@ import com.bz.ins.activity.util.ExcelPoji;
 import com.bz.ins.activity.util.ExcelUtil;
 import com.bz.ins.common.utils.BeanUtil;
 import com.google.common.collect.Lists;
-import org.springframework.context.annotation.Bean;
+import com.google.common.collect.Sets;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -29,6 +29,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -186,7 +187,7 @@ public class ActivityQuestionNativeDomain implements ActivityQuestionDomain {
     private void saveQuestion(ExcelPoji excelPoji, List<String> nickNameList, List<String> nameList) {
         ActivityQuestionBo activityQuestion = new ActivityQuestionBo.Builder()
                 .activityID(1).season(1).seasonID(1).score(10).content(String.format(QUESTION_CONTENT, excelPoji.getName())).answerID(0)
-                .weight(Boolean.TRUE.equals(excelPoji.getBoss()) ? 11 : 10).build();
+                .weight(Boolean.TRUE.equals(excelPoji.getBoss()) ? 101 : 100).build();
         ActivityQuestion activityQuestion1 = BeanUtil.convert(activityQuestion, ActivityQuestion.class);
         questionService.save(activityQuestion1);
         Integer id = activityQuestion1.getID();
@@ -196,16 +197,50 @@ public class ActivityQuestionNativeDomain implements ActivityQuestionDomain {
         updateRightAnswer(rightAnswer, id);
         int i = 0;
         while (i < 3) {
+            Set<String> resultSet = Sets.newHashSet();
             Random random = new Random();
             Integer hehe = random.nextInt(nickNameList.size() - 1);
             String nickName = nickNameList.get(hehe);
-            if (!nickName.equals(excelPoji.getNickName())) {
+            if (!nickName.equals(excelPoji.getNickName()) && !resultSet.contains(nickName)) {
                 ActivityAnswerBo activityAnswerBo1 = new ActivityAnswerBo.Builder().content(nickName).code("N")
                         .questionID(id).score(10).build();
                 answerDomain.save(activityAnswerBo1);
+                resultSet.add(nickName);
                 i++;
             }
         }
+
+        ActivityQuestionBo activityQuestion2 = new ActivityQuestionBo.Builder()
+                .activityID(1).season(1).seasonID(1).score(10).content(String.format(QUESTION_CONTENT_TWO, excelPoji.getNickName())).answerID(0)
+                .weight(Boolean.TRUE.equals(excelPoji.getBoss()) ? 101 : 100).build();
+        ActivityQuestion activityQuestion3 = BeanUtil.convert(activityQuestion2, ActivityQuestion.class);
+        questionService.save(activityQuestion3);
+        Integer id2 = activityQuestion3.getID();
+        ActivityAnswerBo activityAnswerBo1 = new ActivityAnswerBo.Builder().content(excelPoji.getName()).code("N")
+                .questionID(id2).score(10).build();
+        Integer rightAnswer1 = answerDomain.save(activityAnswerBo1);
+        updateRightAnswer(rightAnswer1, id2);
+        int i2 = 0;
+        while (i2 < 3) {
+            Set<String> resultSet = Sets.newHashSet();
+            Random random = new Random();
+            Integer hehe = random.nextInt(nickNameList.size() - 1);
+            String name = nameList.get(hehe);
+            if (!name.equals(excelPoji.getNickName()) && !resultSet.contains(name)) {
+                ActivityAnswerBo activityAnswerBo4 = new ActivityAnswerBo.Builder().content(name).code("N")
+                        .questionID(id2).score(10).build();
+                answerDomain.save(activityAnswerBo4);
+                resultSet.add(name);
+                i2++;
+            }
+        }
+
+
+
+
+
+
+
     }
 
     private List<QuestionAnswerBo> convertToBo(List<QuestionAnswerPojo> pojoList) {

@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,51 +34,17 @@ import java.util.Map;
 @Component
 public class ActivityCacheUtil {
 
-//    @Resource
-//    private RedisTemplate<String, String> redisTemplate;
     @Resource
     private ActivityService activityService;
     @Resource
     private ActivitySeasonService activitySeasonService;
     @Resource
     private ActivityFilterDomain activityFilterDomain;
+    @Resource
+    private CommonRedisHelper commonRedisHelper;
 
 
     private Map<String, String> cache = Maps.newConcurrentMap();
-
-    /**
-     * 获取活动信息 从缓存中
-     * @param activityID
-     * @param seasonID
-     * @return
-     */
-    private ActivityBo getActivityMessageCache(Integer activityID, Integer seasonID) throws ActivityException {
-        String key = ActivityContants.getActivityMessageCacheKey(activityID, seasonID);
-        //String result = redisTemplate.opsForValue().get(key);
-        ActivityBo result = getCache(key);
-        if (null != result) {
-            return result;
-        }
-        Activity activity = activityService.getByID(activityID);
-        if (null == activity) {
-            return null;
-        }
-        ActivityBo activityBo = BeanUtil.convert(activity, ActivityBo.class);
-        activityBo.setSeasonID(seasonID);
-
-        //限制条件放入缓存
-        List<ActivityFilterBo> activityFilterBos = activityFilterDomain.getFilterByActivityIDAndSeasonID(activityID, seasonID);
-        activityBo.setFilterBoList(activityFilterBos);
-
-        ActivityResultBo<ActivityBo> activityResultBo = ActivityUtil.getStrategy(activityBo.getActivityStratey())
-                .cacheActivity(new ActivityParamBo(activityBo, activityID, seasonID));
-        if (ActivityResultBo.isSuccess(activityResultBo)) {
-            //redisTemplate.opsForValue().set(key, JSON.toJSONString(activityResultBo.getObject()));
-            putCache(activityResultBo.getObject(), key);
-            return activityResultBo.getObject();
-        }
-        return null;
-    }
 
     /**
      * 获取活动信息 从缓存中
@@ -90,28 +57,22 @@ public class ActivityCacheUtil {
         if (null != result) {
             return result;
         }
-        Activity activity = activityService.getByCode(activityCode);
-        if (null == activity) {
-            return null;
-        }
-        ActivityBo activityBo = BeanUtil.convert(activity, ActivityBo.class);
-        ActivitySeasonBo activitySeasonBo = activitySeasonService.getCurrentSeason(activityBo.getID());
-        Integer seasonID =  null == activitySeasonBo ? null : activitySeasonBo.getID();
 
-        //限制条件放入缓存
-        if (null != seasonID) {
-            List<ActivityFilterBo> activityFilterBos = activityFilterDomain
-                    .getFilterByActivityIDAndSeasonID(activity.getID(),seasonID);
-            activityBo.setFilterBoList(activityFilterBos);
-        }
+        LinkedHashMap linkedHashMap = new LinkedHashMap();
 
-        ActivityResultBo<ActivityBo> activityResultBo = ActivityUtil.getStrategy(activityBo.getActivityStratey())
-                .cacheActivity(new ActivityParamBo(activityBo, activity.getID(), seasonID));
-        if (ActivityResultBo.isSuccess(activityResultBo)) {
-            putCache(activityResultBo.getObject(), key);
-            return activityResultBo.getObject();
+        //加锁再请求db
+        RedisLockResult lock = commonRedisHelper.lock(key, 3000l);
+        try {
+            if (lock.isLockSuccess()) {
+                return doGetFromDbAndCache(key, activityCode);
+            } else {
+                throw new ActivityException("网络繁忙请稍后重试");
+            }
+        } finally {
+            if (lock.isLockSuccess()) {
+                commonRedisHelper.releaseLock(key, lock);
+            }
         }
-        return null;
     }
 
     private ActivityBo getCache(String key) {
@@ -163,7 +124,37 @@ public class ActivityCacheUtil {
             return activitySeasonBo;
         }
         return null;
+    }
 
+    private ActivityBo doGetFromDbAndCache(String key, String activityCode) {
+        //再次获取缓存
+        ActivityBo result = getCache(key);
+        if (null != result) {
+            return result;
+        }
+        // 从db里获取
+        Activity activity = activityService.getByCode(activityCode);
+        if (null == activity) {
+            return null;
+        }
+        ActivityBo activityBo = BeanUtil.convert(activity, ActivityBo.class);
+        ActivitySeasonBo activitySeasonBo = activitySeasonService.getCurrentSeason(activityBo.getID());
+        Integer seasonID =  null == activitySeasonBo ? null : activitySeasonBo.getID();
+
+        //限制条件放入缓存
+        if (null != seasonID) {
+            List<ActivityFilterBo> activityFilterBos = activityFilterDomain
+                    .getFilterByActivityIDAndSeasonID(activity.getID(),seasonID);
+            activityBo.setFilterBoList(activityFilterBos);
+        }
+
+        ActivityResultBo<ActivityBo> activityResultBo = ActivityUtil.getStrategy(activityBo.getActivityStratey())
+                .cacheActivity(new ActivityParamBo(activityBo, activity.getID(), seasonID));
+        if (ActivityResultBo.isSuccess(activityResultBo)) {
+            putCache(activityResultBo.getObject(), key);
+            return activityResultBo.getObject();
+        }
+        return null;
     }
 
 }
