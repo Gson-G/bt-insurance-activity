@@ -4,10 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.btjf.application.security.entity.CachePacketVo;
 import com.btjf.business.common.exception.BusinessException;
 import com.btjf.common.utils.JSONUtils;
-import com.btjf.insurance.config.enums.ClientType;
-import com.btjf.insurance.user.bo.AccessTokenBo;
 import com.btjf.insurance.user.bo.UserBo;
-import com.btjf.insurance.user.domain.AccessTokenDomain;
 import com.btjf.insurance.user.domain.UserDomain;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.dubbo.config.annotation.Reference;
@@ -34,15 +31,13 @@ public class AccessTokenManage {
     private RedisTemplate<String, String> redisTemplate;
 
     @Reference(version = "1.0.0")
-    private AccessTokenDomain accessTokenDomain;
-
-    @Reference(version = "1.0.0")
     private UserDomain userDomain;
 
     private static final Logger logger = LoggerFactory.getLogger(AccessTokenManage.class);
 
     public static final String ACTIVITY_USER_ACCESS_TOKEN_CACHE_KEY = "activity_user_access_token_cache_key_";
     public static final String ACTIVITY_USERBO_USERID_CACHE_KEY = "activity_userBo_userID_cache_key_";
+    public static final String ACTIVITY_USERID_TOKEN_CACHE_KEY = "activity_userID_token_cache_key_";
 
     /**
      * 设置token缓存
@@ -55,14 +50,15 @@ public class AccessTokenManage {
             return;
         }
         // 若用户有老token删除无用的缓存
-        AccessTokenBo accessTokenBo = accessTokenDomain.getByUserId(userBo.getID(), ClientType.PC.getValue());
-        if(accessTokenBo != null) {
-            redisTemplate.opsForValue().getOperations().delete(this.getTokenUserIDKey(accessTokenBo.getToken()));
-            logger.info("清理用户accessToken：" + accessTokenBo.getToken());
+        String oldToken = getCacheUserIDToken(userBo);
+        if(StringUtils.isNotBlank(oldToken)) {
+            redisTemplate.delete(getTokenUserIDKey(oldToken));
+            logger.info("清理用户accessToken：" + oldToken);
         }
 
-        this.putCacheUserID(accessToken, userBo.getID(), expTime);
-        this.putCacheUserBo(userBo);
+        putCacheUserIDToken(userBo, accessToken);
+        putCacheUserID(accessToken, userBo.getID(), expTime);
+        putCacheUserBo(userBo);
         logger.info("写入用户accessToken：" + accessToken);
 
 
@@ -79,7 +75,7 @@ public class AccessTokenManage {
             CachePacketVo cacheInfoVo = new CachePacketVo();
             cacheInfoVo.setExpire_second(expTime);
             cacheInfoVo.setObj(Id);
-            this.redisTemplate.opsForValue().set(this.getTokenUserIDKey(accessToken), JSONUtils.toJSON(cacheInfoVo));
+            this.redisTemplate.opsForValue().set(getTokenUserIDKey(accessToken), JSONUtils.toJSON(cacheInfoVo));
         }
     }
 
@@ -88,7 +84,15 @@ public class AccessTokenManage {
      * @param userBo
      */
     private void putCacheUserBo(UserBo userBo) {
-        this.redisTemplate.opsForValue().set(this.getTokenUserBOKey(userBo.getID()), JSONUtils.toJSON(userBo));
+        this.redisTemplate.opsForValue().set(getTokenUserBOKey(userBo.getID()), JSONUtils.toJSON(userBo));
+    }
+
+    private void putCacheUserIDToken(UserBo userBo, String token) {
+        this.redisTemplate.opsForValue().set(getActivityUserIDTokenCacheKey(userBo.getID()), token);
+    }
+
+    private String getCacheUserIDToken(UserBo userBo) {
+        return redisTemplate.opsForValue().get(getActivityUserIDTokenCacheKey(userBo.getID()));
     }
 
     /**
@@ -98,11 +102,11 @@ public class AccessTokenManage {
      * @return
      */
     public UserBo get(String accessToken){
-        if(StringUtils.isEmpty(accessToken)){
+        if(StringUtils.isEmpty(accessToken)) {
             return null;
         }
         Integer userId = getUserId(accessToken);
-        if(userId != null){
+        if(userId != null) {
             return getUserBoById(userId);
         }
         return null;
@@ -116,10 +120,10 @@ public class AccessTokenManage {
      * @return
      */
     private Integer getUserId(String accessToken) {
-        if(StringUtils.isEmpty(accessToken)){
+        if(StringUtils.isEmpty(accessToken)) {
             return null;
         }
-        String userIDObj = redisTemplate.opsForValue().get(this.getTokenUserIDKey(accessToken));
+        String userIDObj = redisTemplate.opsForValue().get(getTokenUserIDKey(accessToken));
         if (StringUtils.isBlank(userIDObj)) {
             return null;
         }
@@ -140,7 +144,7 @@ public class AccessTokenManage {
         if (userID == null) {
             return null;
         }
-        String userBoStr = this.redisTemplate.opsForValue().get(this.getTokenUserBOKey(userID));
+        String userBoStr = this.redisTemplate.opsForValue().get(getTokenUserBOKey(userID));
         UserBo userBo = null;
         try {
             userBo = StringUtils.isEmpty(userBoStr) ? null : JSON.parseObject(userBoStr, UserBo.class);
@@ -170,7 +174,8 @@ public class AccessTokenManage {
         return ACTIVITY_USERBO_USERID_CACHE_KEY + userID;
     }
 
-
-
+    public static String getActivityUserIDTokenCacheKey(Integer userID) {
+        return ACTIVITY_USERID_TOKEN_CACHE_KEY + userID;
+    }
 
 }
