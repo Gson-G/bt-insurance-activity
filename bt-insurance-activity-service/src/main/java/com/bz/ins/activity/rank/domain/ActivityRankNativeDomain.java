@@ -1,7 +1,6 @@
 package com.bz.ins.activity.rank.domain;
 
 import com.bz.ins.activity.activity.bo.ActivityParamBo;
-import com.bz.ins.activity.activity.model.Activity;
 import com.bz.ins.activity.exception.ActivityException;
 import com.bz.ins.activity.rank.bo.ActivityRankBo;
 import com.bz.ins.activity.rank.bo.UserRankBo;
@@ -10,7 +9,6 @@ import com.bz.ins.activity.rank.service.ActivityRankService;
 import com.bz.ins.activity.util.CommonRedisHelper;
 import com.bz.ins.activity.util.RedisLockResult;
 import com.bz.ins.common.utils.BeanUtil;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 

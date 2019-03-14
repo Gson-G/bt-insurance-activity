@@ -1,5 +1,6 @@
 package com.bz.ins.activity.util;
 
+import com.bz.ins.activity.exception.ActivityException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.connection.RedisStringCommands;
@@ -71,7 +72,7 @@ public class CommonRedisHelper {
             }
         } catch (InterruptedException e) {
             logger.error("redis 锁获取出错");
-            throw new RuntimeException("redis 锁获取出错");
+            throw new ActivityException("redis 锁获取出错");
         }
         return new RedisLockResult(" ", false);
     }

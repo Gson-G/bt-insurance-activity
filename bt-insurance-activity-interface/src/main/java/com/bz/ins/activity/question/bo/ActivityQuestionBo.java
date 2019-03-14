@@ -110,6 +110,7 @@ public class ActivityQuestionBo implements Serializable {
         private Boolean isDelete;
 
         public Builder() {
+            super();
         }
 
         public Builder questionCode(Integer val) {

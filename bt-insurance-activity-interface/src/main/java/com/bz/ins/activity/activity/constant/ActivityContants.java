@@ -10,10 +10,14 @@ package com.bz.ins.activity.activity.constant;
  */
 public class ActivityContants {
 
+    private ActivityContants(){
+
+    }
+
     /**
      * 活动信息缓存key前缀
      */
-    private final static String ACTIVITY_MESSAGE_CACHE_KEY = "bz_insurance_activity_message_cache_key_";
+    private static final  String ACTIVITY_MESSAGE_CACHE_KEY = "bz_insurance_activity_message_cache_key_";
 
 
     /**
@@ -26,11 +30,6 @@ public class ActivityContants {
      * 活动与期数对应缓存
      */
     private static final String ACTIVITY_SEASON_CAHCHE_KEY = "bz_insurance_activity_activity_season_cache_key_";
-
-    /**
-     * 活动当前其实缓存
-     */
-    private static final String ACTIVITY_CURRENT_SEASON_CACHE_KEY = "bz_insurance_activity_current_season_cache_key_";
 
     /**
      * 活动缓存信息key

@@ -48,6 +48,7 @@ public class ScoreResult implements Serializable {
         private Boolean right;
 
         public Builder() {
+            super();
         }
 
         public Builder score(Integer val) {

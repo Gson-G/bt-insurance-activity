@@ -40,6 +40,7 @@ public class ActivityParamBo<T extends Serializable> implements Serializable {
 
 
     public ActivityParamBo() {
+        super();
     }
 
     public ActivityParamBo(T object) {
@@ -79,6 +80,7 @@ public class ActivityParamBo<T extends Serializable> implements Serializable {
         private String activityCode;
 
         public Builder() {
+            super();
         }
 
         public Builder object(T val) {

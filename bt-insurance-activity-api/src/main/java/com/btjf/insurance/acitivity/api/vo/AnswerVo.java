@@ -1,7 +1,6 @@
 package com.btjf.insurance.acitivity.api.vo;
 
 import com.bz.ins.activity.answer.bo.ActivityAnswerBo;
-import com.bz.ins.activity.question.bo.QuestionAnswerBo;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.NoArgsConstructor;

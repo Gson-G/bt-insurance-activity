@@ -43,68 +43,7 @@ public class BtInsuranceActivityApplication extends SpringBootServletInitializer
 
 
 	public static void main(String[] args) throws Exception {
-
-		ApplicationContext applicationContext = SpringApplication.run(BtInsuranceActivityApplication.class, args);
-		QuestionService questionService = applicationContext.getBean("questionService", QuestionService.class);
-		List<QuestionAnswerPojo> answerPojos = questionService.getTestQuesttions(1,1,2);
-
-		CommonRedisHelper commonRedisHelper = applicationContext.getBean("commonRedisHelper", CommonRedisHelper.class);
-
-
-
-		ActivityRankDomain activityRankDomain = applicationContext.getBean("activityRankDomain", ActivityRankDomain.class);
-		System.out.println(answerPojos);
-		List<ActivityRankBo> activityRankBos = activityRankDomain.getRankList(1,1);
-		System.out.println(answerPojos);
-
-		ActivityQuestionNativeDomain activityQuestionDomain = applicationContext.getBean("activityQuestionDomain", ActivityQuestionNativeDomain.class);
-
-
-
-//		//activityQuestionDomain.initAnswer();
-//		CountDownLatch countDownLatch = new CountDownLatch(100);
-//
-//		for (int j  = 0; j< 100 ; j++) {
-//			Thread thread = new Thread(new myRun(commonRedisHelper, countDownLatch));
-//			thread.start();
-//		}
-//
-//		countDownLatch.await();
-//		System.out.println("i====" + i);
-
+		SpringApplication.run(BtInsuranceActivityApplication.class, args);
 	}
 
-//	static class myRun implements Runnable {
-//
-//		private CommonRedisHelper commonRedisHelper;
-//
-//		private CountDownLatch countDownLatch;
-//
-//		public myRun(CommonRedisHelper commonRedisHelper, CountDownLatch countDownLatch) {
-//			this.commonRedisHelper = commonRedisHelper;
-//			this.countDownLatch = countDownLatch;
-//		}
-//
-//		@Override
-//		public void run() {
-//			RedisLockResult lock = commonRedisHelper.lock("hehe", 3000l);
-//			try {
-//				if (lock.isLockSuccess()) {
-//					System.out.println(Thread.currentThread().getName() + "获取到锁");
-//					Thread.currentThread().sleep(new Random().nextInt(100));
-//					i++;
-//				} else {
-//					throw new ActivityException("网络繁忙请稍后重试");
-//				}
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
-//			} finally {
-//				if (lock.isLockSuccess()) {
-//					System.out.println(Thread.currentThread().getName() + "释放到锁");
-//					commonRedisHelper.releaseLock("hehe", lock);
-//				}
-//				countDownLatch.countDown();
-//			}
-//		}
-//	}
 }

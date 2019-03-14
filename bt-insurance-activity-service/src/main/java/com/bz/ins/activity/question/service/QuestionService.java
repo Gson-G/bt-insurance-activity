@@ -1,6 +1,5 @@
 package com.bz.ins.activity.question.service;
 
-import com.bz.ins.activity.question.bo.QuestionAnswerBo;
 import com.bz.ins.activity.question.mapper.ActivityQuestionMapper;
 import com.bz.ins.activity.question.model.ActivityQuestion;
 import com.bz.ins.activity.question.pojo.QuestionAnswerPojo;

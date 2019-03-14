@@ -42,6 +42,7 @@ public class ActivityNativeDomain implements ActivityDomain{
         if (null == activityBo) {
             return ActivityResultBo.fail();
         }
+        activityParamBo.setActivityID(activityBo.getID());
         return ActivityUtil.getStrategy(activityBo.getActivityStratey()).initActivity(activityParamBo);
     }
 
@@ -70,6 +71,7 @@ public class ActivityNativeDomain implements ActivityDomain{
             return ActivityResultBo.fail();
         }
         //校验活动
+        activityParamBo.setActivityID(activityBo.getID());
         volidateActivity(activityBo, activityParamBo);
 
         return ActivityUtil.getStrategy(activityBo.getActivityStratey()).getReady(activityParamBo);
@@ -134,7 +136,7 @@ public class ActivityNativeDomain implements ActivityDomain{
                 || nowTime > activityBo.getActivitySeasonBo().getEndTime().getTime()) {
             throw new ActivityException("不在本期活动时间呢");
         }
-        List<ActivityFilterBo> boList = activityBo.getFilterBoList();
+        //List<ActivityFilterBo> boList = activityBo.getFilterBoList();
         //todo filter 检验活动
     }
 

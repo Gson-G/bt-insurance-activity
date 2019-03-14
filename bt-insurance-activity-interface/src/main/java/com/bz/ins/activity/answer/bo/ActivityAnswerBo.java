@@ -82,6 +82,7 @@ public class ActivityAnswerBo implements Serializable {
         private Integer score;
 
         public Builder() {
+            super();
         }
 
         public Builder questionID(Integer val) {

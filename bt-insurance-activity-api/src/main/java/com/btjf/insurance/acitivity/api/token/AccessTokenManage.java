@@ -1,20 +1,12 @@
 package com.btjf.insurance.acitivity.api.token;
 
 import com.alibaba.fastjson.JSON;
-import com.btjf.application.components.enums.AppType;
 import com.btjf.application.security.entity.CachePacketVo;
-import com.btjf.business.account.member.bo.MemberBo;
-import com.btjf.business.account.member.domain.MemberDomain;
-import com.btjf.business.account.member.enums.MemberEnums;
-import com.btjf.business.account.user.enums.UserEnums;
-import com.btjf.business.authority.authoritymemberrole.bo.AuthorityMemberRoleBo;
-import com.btjf.business.authority.authoritymemberrole.domain.AuthorityMemberRoleDomain;
 import com.btjf.business.common.exception.BusinessException;
 import com.btjf.common.utils.JSONUtils;
 import com.btjf.insurance.config.enums.ClientType;
 import com.btjf.insurance.user.bo.AccessTokenBo;
 import com.btjf.insurance.user.bo.UserBo;
-import com.btjf.insurance.user.constants.AccessTokenContants;
 import com.btjf.insurance.user.domain.AccessTokenDomain;
 import com.btjf.insurance.user.domain.UserDomain;
 import org.apache.commons.lang3.StringUtils;

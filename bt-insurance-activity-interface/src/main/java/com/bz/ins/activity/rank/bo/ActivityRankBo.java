@@ -118,6 +118,7 @@ public class ActivityRankBo implements Serializable {
         private Integer rank;
 
         public Builder() {
+            super();
         }
 
         public Builder totalScore(Integer val) {
